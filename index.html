@@ -1,0 +1,988 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#0a0a0f">
+<title>Scanner 8020 · Okala</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500;600&display=swap');
+
+  :root {
+    --bg: #0a0a0f;
+    --surface: #12121a;
+    --surface2: #1a1a26;
+    --border: rgba(255,255,255,0.07);
+    --border2: rgba(255,255,255,0.14);
+    --text: #f0f0f8;
+    --muted: rgba(240,240,248,0.45);
+    --green: #00e5a0;
+    --green-dim: rgba(0,229,160,0.12);
+    --green-border: rgba(0,229,160,0.3);
+    --red: #ff4d6d;
+    --red-dim: rgba(255,77,109,0.1);
+    --red-border: rgba(255,77,109,0.3);
+    --amber: #ffb830;
+    --amber-dim: rgba(255,184,48,0.1);
+    --amber-border: rgba(255,184,48,0.3);
+    --purple: #a78bfa;
+    --purple-dim: rgba(167,139,250,0.1);
+    --accent: #00e5a0;
+    --mono: 'Space Mono', monospace;
+    --sans: 'DM Sans', sans-serif;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+  body {
+    font-family: var(--sans);
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    padding-bottom: 2rem;
+    font-size: 15px;
+  }
+
+  /* Header */
+  .header {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 1rem 1.25rem 0.875rem;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .header-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+  }
+  .app-name {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--accent);
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    margin-bottom: 2px;
+  }
+  .app-title {
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--text);
+    line-height: 1.2;
+  }
+  .session-badge {
+    background: var(--surface2);
+    border: 1px solid var(--border2);
+    border-radius: 8px;
+    padding: 4px 10px;
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--muted);
+  }
+  .session-badge span {
+    color: var(--accent);
+    font-weight: 700;
+  }
+
+  /* Tabs */
+  .tabs {
+    display: flex;
+    gap: 0;
+    margin-top: 0.875rem;
+    border-bottom: 1px solid var(--border);
+  }
+  .tab {
+    flex: 1;
+    padding: 8px 4px;
+    text-align: center;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--muted);
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    transition: all .2s;
+    letter-spacing: .02em;
+  }
+  .tab.active {
+    color: var(--accent);
+    border-bottom-color: var(--accent);
+  }
+
+  /* Content */
+  .content { padding: 1rem 1.25rem; }
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+
+  /* Section */
+  .section { margin-bottom: 1.25rem; }
+  .section-label {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 8px;
+  }
+
+  /* Direction buttons */
+  .dir-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; }
+  .dir-btn {
+    padding: 12px 4px;
+    border: 1px solid var(--border2);
+    border-radius: 10px;
+    background: var(--surface);
+    color: var(--muted);
+    font-family: var(--sans);
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    text-align: center;
+    transition: all .2s;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+  }
+  .dir-btn .icon { font-size: 18px; }
+  .dir-btn.long { background: var(--green-dim); border-color: var(--green-border); color: var(--green); }
+  .dir-btn.short { background: var(--red-dim); border-color: var(--red-border); color: var(--red); }
+  .dir-btn.wait { background: var(--amber-dim); border-color: var(--amber-border); color: var(--amber); }
+
+  /* Level buttons */
+  .lvl-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; }
+  .lvl-btn {
+    padding: 10px 4px;
+    border: 1px solid var(--border2);
+    border-radius: 10px;
+    background: var(--surface);
+    color: var(--muted);
+    font-family: var(--mono);
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    text-align: center;
+    transition: all .2s;
+  }
+  .lvl-btn sub { font-size: 9px; font-weight: 400; display: block; font-family: var(--sans); margin-top: 2px; }
+  .lvl-btn.active { background: var(--purple-dim); border-color: var(--purple); color: var(--purple); }
+
+  /* Pattern buttons */
+  .pat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+  .pat-btn {
+    padding: 12px;
+    border: 1px solid var(--border2);
+    border-radius: 10px;
+    background: var(--surface);
+    color: var(--muted);
+    font-family: var(--sans);
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    text-align: left;
+    transition: all .2s;
+    line-height: 1.3;
+  }
+  .pat-btn .pat-icon { font-size: 20px; margin-bottom: 4px; display: block; }
+  .pat-btn .pat-sub { font-size: 11px; color: var(--muted); margin-top: 2px; display: block; }
+  .pat-btn.active { background: var(--purple-dim); border-color: var(--purple); color: var(--text); }
+  .pat-btn.active .pat-sub { color: var(--purple); }
+
+  /* Checklist */
+  .check-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 11px 12px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    margin-bottom: 6px;
+    cursor: pointer;
+    transition: all .2s;
+    background: var(--surface);
+  }
+  .check-item:active { transform: scale(0.98); }
+  .check-item.checked {
+    border-color: var(--green-border);
+    background: var(--green-dim);
+  }
+  .cb {
+    width: 20px; height: 20px; min-width: 20px;
+    border: 1.5px solid var(--border2);
+    border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+    margin-top: 1px;
+    transition: all .2s;
+    font-size: 13px;
+  }
+  .check-item.checked .cb {
+    background: var(--green);
+    border-color: var(--green);
+    color: #000;
+  }
+  .check-label { font-size: 14px; color: var(--text); line-height: 1.35; }
+  .check-sub { font-size: 11px; color: var(--muted); margin-top: 3px; }
+
+  /* Score card */
+  .score-card {
+    background: var(--surface);
+    border: 1px solid var(--border2);
+    border-radius: 14px;
+    padding: 1rem 1.25rem;
+    margin-bottom: 1.25rem;
+  }
+  .score-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; }
+  .score-big {
+    font-family: var(--mono);
+    font-size: 36px;
+    font-weight: 700;
+    line-height: 1;
+    color: var(--text);
+  }
+  .score-den { font-size: 18px; color: var(--muted); }
+  .score-pct { font-family: var(--mono); font-size: 12px; color: var(--muted); text-align: right; }
+  .bar-bg { height: 6px; background: var(--surface2); border-radius: 3px; overflow: hidden; margin-bottom: 10px; }
+  .bar-fill { height: 100%; border-radius: 3px; transition: width .4s, background .4s; }
+  .verdict {
+    font-size: 13px;
+    font-weight: 500;
+    padding: 8px 12px;
+    border-radius: 8px;
+    text-align: center;
+    border: 1px solid;
+  }
+  .verdict.green { background: var(--green-dim); border-color: var(--green-border); color: var(--green); }
+  .verdict.amber { background: var(--amber-dim); border-color: var(--amber-border); color: var(--amber); }
+  .verdict.red { background: var(--red-dim); border-color: var(--red-border); color: var(--red); }
+  .verdict.neutral { background: var(--surface2); border-color: var(--border2); color: var(--muted); }
+
+  /* Calculator */
+  .input-group { margin-bottom: 10px; }
+  .input-label { font-size: 11px; color: var(--muted); font-weight: 500; letter-spacing: .06em; text-transform: uppercase; margin-bottom: 5px; }
+  .input-field {
+    width: 100%;
+    padding: 11px 14px;
+    border: 1px solid var(--border2);
+    border-radius: 10px;
+    background: var(--surface);
+    color: var(--text);
+    font-family: var(--mono);
+    font-size: 15px;
+    outline: none;
+    transition: border-color .2s;
+  }
+  .input-field:focus { border-color: var(--accent); }
+  .input-field::placeholder { color: var(--muted); }
+
+  .calc-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 1rem; }
+  .calc-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 10px 12px;
+  }
+  .calc-lbl { font-size: 10px; color: var(--muted); font-weight: 500; letter-spacing: .06em; text-transform: uppercase; margin-bottom: 4px; }
+  .calc-val { font-family: var(--mono); font-size: 16px; font-weight: 700; color: var(--text); }
+  .calc-card.stop .calc-val { color: var(--red); }
+  .calc-card.tp1 .calc-val { color: var(--green); }
+  .calc-card.risk .calc-val { color: var(--amber); }
+
+  /* Log */
+  .log-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
+  .log-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-bottom: 1.25rem; }
+  .stat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 10px;
+    text-align: center;
+  }
+  .stat-lbl { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; margin-bottom: 4px; }
+  .stat-val { font-family: var(--mono); font-size: 18px; font-weight: 700; }
+  .stat-val.green { color: var(--green); }
+  .stat-val.red { color: var(--red); }
+  .stat-val.neutral { color: var(--text); }
+
+  .add-trade-form {
+    background: var(--surface);
+    border: 1px solid var(--border2);
+    border-radius: 14px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+  }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px; }
+  .form-row-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; margin-bottom: 8px; }
+  .select-field {
+    width: 100%;
+    padding: 10px 10px;
+    border: 1px solid var(--border2);
+    border-radius: 10px;
+    background: var(--surface2);
+    color: var(--text);
+    font-family: var(--sans);
+    font-size: 13px;
+    outline: none;
+    appearance: none;
+    -webkit-appearance: none;
+  }
+  .add-btn {
+    width: 100%;
+    padding: 12px;
+    background: var(--green-dim);
+    border: 1px solid var(--green-border);
+    border-radius: 10px;
+    color: var(--green);
+    font-family: var(--sans);
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all .2s;
+  }
+  .add-btn:active { transform: scale(0.98); }
+
+  .trade-list { display: flex; flex-direction: column; gap: 8px; }
+  .trade-item {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 12px;
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    gap: 10px;
+    align-items: center;
+  }
+  .trade-dir {
+    width: 32px; height: 32px;
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px;
+  }
+  .trade-dir.long { background: var(--green-dim); }
+  .trade-dir.short { background: var(--red-dim); }
+  .trade-info { min-width: 0; }
+  .trade-meta { font-size: 11px; color: var(--muted); }
+  .trade-desc { font-size: 13px; font-weight: 500; }
+  .trade-pnl { font-family: var(--mono); font-size: 15px; font-weight: 700; text-align: right; }
+  .trade-pnl.pos { color: var(--green); }
+  .trade-pnl.neg { color: var(--red); }
+
+  .empty-log {
+    text-align: center;
+    padding: 2rem 1rem;
+    color: var(--muted);
+    font-size: 14px;
+  }
+
+  /* Reset */
+  .reset-btn {
+    width: 100%;
+    padding: 11px;
+    background: transparent;
+    border: 1px solid var(--border2);
+    border-radius: 10px;
+    color: var(--muted);
+    font-family: var(--sans);
+    font-size: 13px;
+    cursor: pointer;
+    margin-top: 0.5rem;
+    transition: all .2s;
+  }
+  .reset-btn:active { background: var(--surface2); }
+
+  /* Reglas */
+  .rules-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1rem;
+    margin-bottom: 8px;
+  }
+  .rule-title {
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 8px;
+  }
+  .rule-item {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 7px;
+    font-size: 13px;
+    color: var(--text);
+    line-height: 1.4;
+  }
+  .rule-dot { color: var(--accent); font-weight: 700; margin-top: 1px; flex-shrink: 0; }
+
+  .divider { height: 1px; background: var(--border); margin: 1.25rem 0; }
+
+  /* Session alert */
+  .session-alert {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    padding: 10px 12px;
+    border-radius: 10px;
+    font-size: 12px;
+    margin-bottom: 1rem;
+  }
+  .session-alert.open { background: var(--green-dim); border: 1px solid var(--green-border); color: var(--green); }
+  .session-alert.lunch { background: var(--red-dim); border: 1px solid var(--red-border); color: var(--red); }
+  .session-alert.closed { background: var(--surface2); border: 1px solid var(--border2); color: var(--muted); }
+  .session-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+  .session-dot.open { background: var(--green); }
+  .session-dot.lunch { background: var(--red); }
+  .session-dot.closed { background: var(--muted); }
+
+  .small-btn {
+    padding: 5px 10px;
+    background: transparent;
+    border: 1px solid var(--border2);
+    border-radius: 6px;
+    color: var(--muted);
+    font-size: 11px;
+    cursor: pointer;
+    font-family: var(--sans);
+  }
+  .small-btn:active { background: var(--surface2); }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-top">
+    <div>
+      <div class="app-name">NASDAQ · Prop Trading</div>
+      <div class="app-title">Scanner 8020</div>
+    </div>
+    <div class="session-badge">Okala <span>v1.0</span></div>
+  </div>
+  <div class="tabs">
+    <div class="tab active" onclick="showTab('scanner')">Scanner</div>
+    <div class="tab" onclick="showTab('calc')">Calculadora</div>
+    <div class="tab" onclick="showTab('log')">Log del día</div>
+    <div class="tab" onclick="showTab('reglas')">Reglas</div>
+  </div>
+</div>
+
+<div class="content">
+
+  <!-- SCANNER TAB -->
+  <div class="tab-panel active" id="tab-scanner">
+
+    <div id="session-status" class="session-alert"></div>
+
+    <!-- Dirección -->
+    <div class="section">
+      <div class="section-label">Dirección</div>
+      <div class="dir-grid">
+        <button class="dir-btn" id="btn-long" onclick="setDir('long')">
+          <span class="icon">📈</span>Long
+        </button>
+        <button class="dir-btn" id="btn-short" onclick="setDir('short')">
+          <span class="icon">📉</span>Short
+        </button>
+        <button class="dir-btn" id="btn-wait" onclick="setDir('wait')">
+          <span class="icon">⏸</span>Esperar
+        </button>
+      </div>
+    </div>
+
+    <!-- Nivel -->
+    <div class="section">
+      <div class="section-label">Nivel 8020</div>
+      <div class="lvl-grid">
+        <button class="lvl-btn" id="lvl-80" onclick="setLvl('80')">
+          80<sub>nivel principal</sub>
+        </button>
+        <button class="lvl-btn" id="lvl-20" onclick="setLvl('20')">
+          20<sub>nivel principal</sub>
+        </button>
+        <button class="lvl-btn" id="lvl-int" onclick="setLvl('int')">
+          Int<sub>intermedio</sub>
+        </button>
+      </div>
+    </div>
+
+    <!-- Patrón -->
+    <div class="section">
+      <div class="section-label">Patrón de estructura</div>
+      <div class="pat-grid">
+        <button class="pat-btn" id="pat-fork" onclick="setPat('fork')">
+          <span class="pat-icon">🍴</span>
+          Horquilla (Fork)
+          <span class="pat-sub">Reversión desde mínimo</span>
+        </button>
+        <button class="pat-btn" id="pat-h" onclick="setPat('h')">
+          <span class="pat-icon">🅷</span>
+          Patrón H
+          <span class="pat-sub">Continuación bajista</span>
+        </button>
+        <button class="pat-btn" id="pat-cross" onclick="setPat('cross')">
+          <span class="pat-icon">✂️</span>
+          Sección Transversal
+          <span class="pat-sub">Retest del cruce</span>
+        </button>
+        <button class="pat-btn" id="pat-repair" onclick="setPat('repair')">
+          <span class="pat-icon">🧲</span>
+          Reparación
+          <span class="pat-sub">Vela sin mecha = imán</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Score -->
+    <div class="score-card">
+      <div class="score-top">
+        <div>
+          <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px">Confluencia</div>
+          <div class="score-big"><span id="score-n">0</span><span class="score-den">/5</span></div>
+        </div>
+        <div class="score-pct">
+          <div style="font-size:20px;font-family:var(--mono);font-weight:700" id="score-pct">0%</div>
+          <div style="margin-top:2px">de criterios</div>
+        </div>
+      </div>
+      <div class="bar-bg"><div class="bar-fill" id="bar-fill" style="width:0%;background:var(--muted)"></div></div>
+      <div class="verdict neutral" id="verdict">Marca los criterios de entrada</div>
+    </div>
+
+    <!-- Checklist entrada -->
+    <div class="section">
+      <div class="section-label">Criterios de entrada</div>
+      <div id="entry-checks"></div>
+    </div>
+
+    <!-- Checklist gestión -->
+    <div class="divider"></div>
+    <div class="section">
+      <div class="section-label">Gestión activa</div>
+      <div id="mgmt-checks"></div>
+    </div>
+
+    <button class="reset-btn" onclick="resetScanner()">↺ Reiniciar scanner</button>
+  </div>
+
+  <!-- CALCULADORA TAB -->
+  <div class="tab-panel" id="tab-calc">
+
+    <div class="section">
+      <div class="section-label">Parámetros de la operación</div>
+      <div class="input-group">
+        <div class="input-label">Dirección</div>
+        <select class="select-field" id="calc-dir" onchange="calcAll()">
+          <option value="long">📈 Long</option>
+          <option value="short">📉 Short</option>
+        </select>
+      </div>
+      <div class="form-row">
+        <div class="input-group">
+          <div class="input-label">Precio de entrada</div>
+          <input class="input-field" type="number" id="calc-entry" placeholder="21080" oninput="calcAll()">
+        </div>
+        <div class="input-group">
+          <div class="input-label">Contratos</div>
+          <input class="input-field" type="number" id="calc-contracts" placeholder="2" min="1" oninput="calcAll()">
+        </div>
+      </div>
+      <div class="input-group">
+        <div class="input-label">Precio imán (reparación, opcional)</div>
+        <input class="input-field" type="number" id="calc-magnet" placeholder="21040" oninput="calcAll()">
+      </div>
+    </div>
+
+    <div class="calc-grid">
+      <div class="calc-card stop">
+        <div class="calc-lbl">Stop −10 pts</div>
+        <div class="calc-val" id="c-stop">—</div>
+      </div>
+      <div class="calc-card tp1">
+        <div class="calc-lbl">TP1 +15 pts</div>
+        <div class="calc-val" id="c-tp1">—</div>
+      </div>
+      <div class="calc-card">
+        <div class="calc-lbl">TP2 +30 pts</div>
+        <div class="calc-val" id="c-tp2">—</div>
+      </div>
+      <div class="calc-card">
+        <div class="calc-lbl">TP3 +60 pts</div>
+        <div class="calc-val" id="c-tp3">—</div>
+      </div>
+      <div class="calc-card risk">
+        <div class="calc-lbl">Riesgo total</div>
+        <div class="calc-val" id="c-risk">—</div>
+      </div>
+      <div class="calc-card tp1">
+        <div class="calc-lbl">Beneficio TP1</div>
+        <div class="calc-val" id="c-profit">—</div>
+      </div>
+    </div>
+
+    <div style="margin-top:1rem;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:1rem" id="magnet-section">
+      <div class="calc-lbl" style="margin-bottom:6px">Imán de reparación</div>
+      <div class="calc-val" id="c-magnet-dist" style="color:var(--purple)">—</div>
+      <div style="font-size:11px;color:var(--muted);margin-top:4px">Distancia al objetivo imán</div>
+    </div>
+
+    <div style="margin-top:1rem;background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:1rem">
+      <div style="font-size:11px;color:var(--muted);line-height:1.6">
+        <strong style="color:var(--text)">Regla de contratos:</strong><br>
+        Con 2 contratos → cerrar 1 en TP1, dejar 1 correr.<br>
+        Con 4 contratos → cerrar 2 en TP1, 1 en TP2, 1 en TP3.<br>
+        Stop siempre a punto de equilibrio después de TP1.
+      </div>
+    </div>
+  </div>
+
+  <!-- LOG TAB -->
+  <div class="tab-panel" id="tab-log">
+
+    <div class="log-stats">
+      <div class="stat-card">
+        <div class="stat-lbl">Operaciones</div>
+        <div class="stat-val neutral" id="stat-trades">0</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-lbl">Win Rate</div>
+        <div class="stat-val neutral" id="stat-wr">—</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-lbl">P&L Neto</div>
+        <div class="stat-val neutral" id="stat-pnl">0</div>
+      </div>
+    </div>
+
+    <div class="add-trade-form">
+      <div class="section-label" style="margin-bottom:10px">Registrar operación</div>
+      <div class="form-row">
+        <div>
+          <div class="input-label">Dirección</div>
+          <select class="select-field" id="log-dir">
+            <option value="long">📈 Long</option>
+            <option value="short">📉 Short</option>
+          </select>
+        </div>
+        <div>
+          <div class="input-label">Resultado</div>
+          <select class="select-field" id="log-result">
+            <option value="win">✅ Win</option>
+            <option value="loss">❌ Loss</option>
+            <option value="be">➖ Break Even</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div>
+          <div class="input-label">Puntos (P&L)</div>
+          <input class="input-field" type="number" id="log-pts" placeholder="ej. 25" style="font-size:14px;padding:9px 12px">
+        </div>
+        <div>
+          <div class="input-label">Patrón</div>
+          <select class="select-field" id="log-pat">
+            <option value="fork">Fork</option>
+            <option value="h">Patrón H</option>
+            <option value="cross">Transversal</option>
+            <option value="repair">Reparación</option>
+          </select>
+        </div>
+      </div>
+      <div style="margin-bottom:8px">
+        <div class="input-label">Nota (opcional)</div>
+        <input class="input-field" type="text" id="log-note" placeholder="ej. Nivel 80 + fork perfecto" style="font-size:13px;padding:9px 12px">
+      </div>
+      <button class="add-btn" onclick="addTrade()">+ Registrar operación</button>
+    </div>
+
+    <div class="log-header">
+      <div style="font-size:12px;color:var(--muted)">Operaciones de hoy</div>
+      <button class="small-btn" onclick="clearLog()">Limpiar día</button>
+    </div>
+    <div class="trade-list" id="trade-list">
+      <div class="empty-log">Sin operaciones aún.<br>Registra tu primera operación arriba.</div>
+    </div>
+  </div>
+
+  <!-- REGLAS TAB -->
+  <div class="tab-panel" id="tab-reglas">
+
+    <div id="session-status2" class="session-alert"></div>
+
+    <div class="rules-card">
+      <div class="rule-title">⚡ Niveles clave</div>
+      <div class="rule-item"><span class="rule-dot">→</span>Operar principalmente en niveles terminados en 80 y 20</div>
+      <div class="rule-item"><span class="rule-dot">→</span>El precio no tiene que tocar exactamente el nivel — reaccionar a la velocidad</div>
+      <div class="rule-item"><span class="rule-dot">→</span>Si se pierde el nivel, esperar la siguiente estructura. No perseguir.</div>
+      <div class="rule-item"><span class="rule-dot">→</span>80 no es solo long ni 20 solo short. Depende de la estructura</div>
+    </div>
+
+    <div class="rules-card">
+      <div class="rule-title">📊 Timeframes</div>
+      <div class="rule-item"><span class="rule-dot">→</span>10 minutos: estructura general y panorama del mercado</div>
+      <div class="rule-item"><span class="rule-dot">→</span>200 segundos: entrada exacta (divide el 10min en 3 partes)</div>
+    </div>
+
+    <div class="rules-card">
+      <div class="rule-title">🍴 Horquilla (Fork)</div>
+      <div class="rule-item"><span class="rule-dot">→</span>Fuerte movimiento a la baja + mecha larga + cuerpo pequeño</div>
+      <div class="rule-item"><span class="rule-dot">→</span>Vela siguiente no rompe el mínimo → entrada larga</div>
+      <div class="rule-item"><span class="rule-dot">→</span>Buscar deshacerse de los cortos tardíos atrapados</div>
+    </div>
+
+    <div class="rules-card">
+      <div class="rule-title">🅷 Patrón H</div>
+      <div class="rule-item"><span class="rule-dot">→</span>Continuación de tendencia bajista a corto plazo</div>
+      <div class="rule-item"><span class="rule-dot">→</span>Sube a 80 con mecha, no hace máximo más alto, vuelve a caer</div>
+      <div class="rule-item"><span class="rule-dot">→</span>Entrada corta en el retest del nivel con sección transversal</div>
+    </div>
+
+    <div class="rules-card">
+      <div class="rule-title">✂️ Sección Transversal</div>
+      <div class="rule-item"><span class="rule-dot">→</span>Precio vuelve al cruce entre dos velas fuertes anteriores</div>
+      <div class="rule-item"><span class="rule-dot">→</span>Combinar: nivel 8020 + sección transversal = alta confluencia</div>
+      <div class="rule-item"><span class="rule-dot">→</span>La toca y rechaza → entrada en dirección de la tendencia</div>
+    </div>
+
+    <div class="rules-card">
+      <div class="rule-title">🧲 Reparación (Imán)</div>
+      <div class="rule-item"><span class="rule-dot">→</span>Vela sin mecha = no hubo participantes a esos precios</div>
+      <div class="rule-item"><span class="rule-dot">→</span>Órdenes límite no ejecutadas siguen ahí esperando</div>
+      <div class="rule-item"><span class="rule-dot">→</span>El precio tiende a volver a "reparar" esa zona como imán</div>
+      <div class="rule-item"><span class="rule-dot">→</span>Usar como objetivo de salida, no solo como entrada</div>
+    </div>
+
+    <div class="rules-card">
+      <div class="rule-title">🎯 Gestión siempre igual</div>
+      <div class="rule-item"><span class="rule-dot">→</span>Stop fijo de 10 puntos en todas las entradas</div>
+      <div class="rule-item"><span class="rule-dot">→</span>TP1 en 15 puntos → cubre el riesgo total</div>
+      <div class="rule-item"><span class="rule-dot">→</span>Después del TP1 mover stop a punto de equilibrio</div>
+      <div class="rule-item"><span class="rule-dot">→</span>Resto de la posición: dejar correr según momentum</div>
+    </div>
+
+    <div class="rules-card">
+      <div class="rule-title">⏰ Sesiones</div>
+      <div class="rule-item"><span class="rule-dot">→</span>Apertura Nueva York: mayor volatilidad = mejor oportunidad</div>
+      <div class="rule-item"><span class="rule-dot">→</span>Hora del almuerzo NY (12:00–13:30 ET): EVITAR</div>
+      <div class="rule-item"><span class="rule-dot">→</span>Mercados lentos y en tendencia: reducir operaciones</div>
+    </div>
+
+    <div class="rules-card">
+      <div class="rule-title">🧠 Disciplina</div>
+      <div class="rule-item"><span class="rule-dot">→</span>Si estás en racha y el mercado te da señales claras: pisa el acelerador</div>
+      <div class="rule-item"><span class="rule-dot">→</span>Si el mercado no da estructura clara: salir o reducir tamaño</div>
+      <div class="rule-item"><span class="rule-dot">→</span>No forzar entradas que no cumplen todos los criterios</div>
+      <div class="rule-item"><span class="rule-dot">→</span>Tasa de éxito objetivo: 70–75%</div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+// State
+let state = { dir: null, lvl: null, pat: null, checked: {} };
+let trades = JSON.parse(localStorage.getItem('trades_8020') || '[]');
+let tradeDate = localStorage.getItem('trade_date') || '';
+
+// Check if new day
+const today = new Date().toDateString();
+if (tradeDate !== today) {
+  trades = [];
+  localStorage.setItem('trades_8020', '[]');
+  localStorage.setItem('trade_date', today);
+}
+
+const entryItems = [
+  { id: 'e1', label: 'Precio en o cerca del nivel 80/20', sub: '2–3 puntos de margen si hay velocidad' },
+  { id: 'e2', label: 'Estructura clara presente', sub: 'Fork, H, sección transversal o imán' },
+  { id: 'e3', label: 'Rechazo o fallo de ruptura visible', sub: 'Mecha larga o vela de indecisión en el nivel' },
+  { id: 'e4', label: 'Reacción instantánea confirmada', sub: 'No esperar demasiada confirmación' },
+  { id: 'e5', label: 'Stop de 10 puntos posible y limpio', sub: 'Si requiere más de 10 pts de stop, no entrar' },
+];
+const mgmtItems = [
+  { id: 'm1', label: 'TP1 tomado (~15 puntos)', sub: 'Cerrar primera posición — riesgo cubierto' },
+  { id: 'm2', label: 'Stop movido a punto de equilibrio', sub: 'Inmediatamente después del TP1' },
+  { id: 'm3', label: 'Imán de reparación identificado', sub: 'Vela sin mecha = órdenes esperando' },
+  { id: 'm4', label: 'Momentum continúa a favor', sub: 'Si oscila sin dirección → cerrar resto' },
+];
+
+function renderChecks(items, id) {
+  document.getElementById(id).innerHTML = items.map(it => `
+    <div class="check-item${state.checked[it.id] ? ' checked' : ''}" onclick="toggle('${it.id}','${id}')">
+      <div class="cb">${state.checked[it.id] ? '✓' : ''}</div>
+      <div><div class="check-label">${it.label}</div><div class="check-sub">${it.sub}</div></div>
+    </div>`).join('');
+}
+
+function toggle(id, cont) {
+  state.checked[id] = !state.checked[id];
+  const items = cont === 'entry-checks' ? entryItems : mgmtItems;
+  renderChecks(items, cont);
+  updateScore();
+}
+
+function setDir(d) {
+  state.dir = d;
+  ['long','short','wait'].forEach(v => {
+    const b = document.getElementById('btn-'+v);
+    b.className = 'dir-btn' + (d === v ? ' '+v : '');
+  });
+}
+
+function setLvl(l) {
+  state.lvl = l;
+  ['80','20','int'].forEach(v => {
+    document.getElementById('lvl-'+v).className = 'lvl-btn' + (l === v ? ' active' : '');
+  });
+}
+
+function setPat(p) {
+  state.pat = p;
+  ['fork','h','cross','repair'].forEach(v => {
+    document.getElementById('pat-'+v).className = 'pat-btn' + (p === v ? ' active' : '');
+  });
+}
+
+function updateScore() {
+  const n = entryItems.filter(it => state.checked[it.id]).length;
+  const pct = Math.round((n / entryItems.length) * 100);
+  document.getElementById('score-n').textContent = n;
+  document.getElementById('score-pct').textContent = pct + '%';
+  const fill = document.getElementById('bar-fill');
+  fill.style.width = pct + '%';
+  fill.style.background = pct >= 80 ? 'var(--green)' : pct >= 60 ? 'var(--amber)' : pct > 0 ? 'var(--red)' : 'var(--muted)';
+  const v = document.getElementById('verdict');
+  if (n === 0) { v.textContent = 'Marca los criterios de entrada'; v.className = 'verdict neutral'; }
+  else if (pct >= 80) { v.textContent = '✓ Alta confluencia — entrada válida'; v.className = 'verdict green'; }
+  else if (pct >= 60) { v.textContent = '⚠ Confluencia media — revisar criterios'; v.className = 'verdict amber'; }
+  else { v.textContent = '✗ Confluencia baja — esperar mejor setup'; v.className = 'verdict red'; }
+}
+
+function resetScanner() {
+  state = { dir: null, lvl: null, pat: null, checked: {} };
+  ['long','short','wait'].forEach(v => document.getElementById('btn-'+v).className = 'dir-btn');
+  ['80','20','int'].forEach(v => document.getElementById('lvl-'+v).className = 'lvl-btn');
+  ['fork','h','cross','repair'].forEach(v => document.getElementById('pat-'+v).className = 'pat-btn');
+  renderChecks(entryItems, 'entry-checks');
+  renderChecks(mgmtItems, 'mgmt-checks');
+  updateScore();
+}
+
+// Calculator
+function calcAll() {
+  const ep = parseFloat(document.getElementById('calc-entry').value);
+  const ct = parseInt(document.getElementById('calc-contracts').value) || 1;
+  const mag = parseFloat(document.getElementById('calc-magnet').value);
+  const isShort = document.getElementById('calc-dir').value === 'short';
+  const mult = isShort ? -1 : 1;
+  if (isNaN(ep)) {
+    ['c-stop','c-tp1','c-tp2','c-tp3','c-risk','c-profit','c-magnet-dist'].forEach(id => document.getElementById(id).textContent = '—');
+    return;
+  }
+  document.getElementById('c-stop').textContent = (ep - mult * 10).toFixed(0);
+  document.getElementById('c-tp1').textContent = (ep + mult * 15).toFixed(0);
+  document.getElementById('c-tp2').textContent = (ep + mult * 30).toFixed(0);
+  document.getElementById('c-tp3').textContent = (ep + mult * 60).toFixed(0);
+  document.getElementById('c-risk').textContent = '$' + (10 * ct * 20).toLocaleString();
+  document.getElementById('c-profit').textContent = '$' + (15 * ct * 20).toLocaleString();
+  if (!isNaN(mag)) {
+    const dist = Math.abs(mag - ep);
+    document.getElementById('c-magnet-dist').textContent = dist.toFixed(0) + ' pts → ' + mag.toFixed(0);
+  } else {
+    document.getElementById('c-magnet-dist').textContent = 'Ingresa precio del imán';
+  }
+}
+
+// Trades log
+function addTrade() {
+  const dir = document.getElementById('log-dir').value;
+  const result = document.getElementById('log-result').value;
+  const pts = parseFloat(document.getElementById('log-pts').value) || 0;
+  const pat = document.getElementById('log-pat').value;
+  const note = document.getElementById('log-note').value;
+  const time = new Date().toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit' });
+  const signedPts = result === 'loss' ? -Math.abs(pts) : Math.abs(pts);
+  trades.push({ dir, result, pts: signedPts, pat, note, time });
+  localStorage.setItem('trades_8020', JSON.stringify(trades));
+  document.getElementById('log-pts').value = '';
+  document.getElementById('log-note').value = '';
+  renderLog();
+}
+
+function clearLog() {
+  if (confirm('¿Limpiar todas las operaciones del día?')) {
+    trades = [];
+    localStorage.setItem('trades_8020', '[]');
+    renderLog();
+  }
+}
+
+const patNames = { fork: 'Fork', h: 'Patrón H', cross: 'Transversal', repair: 'Reparación' };
+
+function renderLog() {
+  const wins = trades.filter(t => t.result === 'win').length;
+  const total = trades.length;
+  const pnl = trades.reduce((s, t) => s + t.pts, 0);
+  document.getElementById('stat-trades').textContent = total;
+  const wrEl = document.getElementById('stat-wr');
+  wrEl.textContent = total > 0 ? Math.round((wins / total) * 100) + '%' : '—';
+  wrEl.className = 'stat-val ' + (total === 0 ? 'neutral' : wins / total >= 0.7 ? 'green' : 'red');
+  const pnlEl = document.getElementById('stat-pnl');
+  pnlEl.textContent = (pnl >= 0 ? '+' : '') + pnl + ' pts';
+  pnlEl.className = 'stat-val ' + (pnl > 0 ? 'green' : pnl < 0 ? 'red' : 'neutral');
+  const list = document.getElementById('trade-list');
+  if (trades.length === 0) {
+    list.innerHTML = '<div class="empty-log">Sin operaciones aún.<br>Registra tu primera operación arriba.</div>';
+    return;
+  }
+  list.innerHTML = [...trades].reverse().map((t, i) => `
+    <div class="trade-item">
+      <div class="trade-dir ${t.dir}">${t.dir === 'long' ? '📈' : '📉'}</div>
+      <div class="trade-info">
+        <div class="trade-meta">${t.time} · ${patNames[t.pat]}</div>
+        <div class="trade-desc">${t.result === 'win' ? '✅' : t.result === 'loss' ? '❌' : '➖'} ${t.note || (t.result === 'be' ? 'Break even' : t.result)}</div>
+      </div>
+      <div class="trade-pnl ${t.pts >= 0 ? 'pos' : 'neg'}">${t.pts >= 0 ? '+' : ''}${t.pts}</div>
+    </div>`).join('');
+}
+
+// Session status
+function updateSession() {
+  const now = new Date();
+  const etOffset = -5; // ET offset (ajustar si es EDT: -4)
+  const etHour = (now.getUTCHours() + etOffset + 24) % 24;
+  const etMin = now.getUTCMinutes();
+  const etTime = etHour + etMin / 60;
+  let msg, cls;
+  if (etTime >= 9.5 && etTime < 12) {
+    msg = '🟢 Apertura Nueva York activa — mejor momento para operar'; cls = 'open';
+  } else if (etTime >= 12 && etTime < 13.5) {
+    msg = '🔴 Hora del almuerzo NY — EVITAR operar (baja volatilidad)'; cls = 'lunch';
+  } else if (etTime >= 13.5 && etTime < 16) {
+    msg = '🟡 Tarde Nueva York — operar con criterio selectivo'; cls = 'open';
+  } else {
+    msg = '⚫ Mercado NY cerrado o pre-mercado'; cls = 'closed';
+  }
+  ['session-status','session-status2'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) { el.className = 'session-alert '+cls; el.innerHTML = `<div class="session-dot ${cls}"></div>${msg}`; }
+  });
+}
+
+function showTab(t) {
+  document.querySelectorAll('.tab').forEach((el, i) => el.className = 'tab' + (['scanner','calc','log','reglas'][i] === t ? ' active' : ''));
+  document.querySelectorAll('.tab-panel').forEach(el => el.className = 'tab-panel');
+  document.getElementById('tab-'+t).className = 'tab-panel active';
+}
+
+// Init
+renderChecks(entryItems, 'entry-checks');
+renderChecks(mgmtItems, 'mgmt-checks');
+updateScore();
+renderLog();
+updateSession();
+setInterval(updateSession, 60000);
+</script>
+</body>
+</html>
