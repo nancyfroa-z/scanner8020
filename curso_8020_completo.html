@@ -1,0 +1,1869 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#080810">
+<title>Curso 8020 · De Cero a Futuros</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Inconsolata:wght@400;600&family=Lora:ital,wght@0,400;0,500;1,400&display=swap');
+
+:root {
+  --bg: #080810;
+  --surface: #0f0f1a;
+  --surface2: #16162a;
+  --surface3: #1e1e35;
+  --border: rgba(255,255,255,0.06);
+  --border2: rgba(255,255,255,0.12);
+  --text: #eeeef8;
+  --muted: rgba(238,238,248,0.4);
+  --muted2: rgba(238,238,248,0.65);
+  --green: #00ffaa;
+  --green-dim: rgba(0,255,170,0.08);
+  --green-border: rgba(0,255,170,0.25);
+  --red: #ff4d6d;
+  --red-dim: rgba(255,77,109,0.08);
+  --amber: #ffcc44;
+  --amber-dim: rgba(255,204,68,0.08);
+  --blue: #60a5fa;
+  --blue-dim: rgba(96,165,250,0.08);
+  --purple: #c084fc;
+  --purple-dim: rgba(192,132,252,0.08);
+  --accent: #00ffaa;
+  --syne: 'Syne', sans-serif;
+  --lora: 'Lora', serif;
+  --mono: 'Inconsolata', monospace;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+body {
+  font-family: var(--lora);
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  font-size: 16px;
+  line-height: 1.7;
+}
+
+/* ── SPLASH SCREEN ── */
+.splash {
+  position: fixed; inset: 0;
+  background: var(--bg);
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  z-index: 1000;
+  transition: opacity .5s, visibility .5s;
+}
+.splash.hidden { opacity: 0; visibility: hidden; }
+.splash-logo {
+  font-family: var(--syne);
+  font-size: 64px;
+  font-weight: 800;
+  color: var(--accent);
+  line-height: 1;
+  margin-bottom: 8px;
+}
+.splash-sub {
+  font-family: var(--mono);
+  font-size: 13px;
+  color: var(--muted);
+  letter-spacing: .15em;
+  text-transform: uppercase;
+}
+.splash-bar {
+  width: 120px; height: 2px;
+  background: var(--surface3);
+  border-radius: 1px;
+  margin-top: 2rem;
+  overflow: hidden;
+}
+.splash-fill {
+  height: 100%;
+  background: var(--accent);
+  border-radius: 1px;
+  animation: load 1.2s ease forwards;
+}
+@keyframes load { from{width:0} to{width:100%} }
+
+/* ── SIDEBAR ── */
+.layout { display: flex; min-height: 100vh; }
+
+.sidebar {
+  width: 280px;
+  min-width: 280px;
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  position: fixed;
+  top: 0; left: 0; bottom: 0;
+  overflow-y: auto;
+  z-index: 50;
+  transform: translateX(-100%);
+  transition: transform .3s cubic-bezier(.4,0,.2,1);
+}
+.sidebar.open { transform: translateX(0); }
+
+.sidebar-header {
+  padding: 1.5rem 1.25rem 1rem;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+.sidebar-logo {
+  font-family: var(--syne);
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--accent);
+}
+.sidebar-sub {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--muted);
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  margin-top: 2px;
+}
+
+.sidebar-progress {
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid var(--border);
+}
+.prog-label { font-family: var(--mono); font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: .08em; margin-bottom: 6px; }
+.prog-bar { height: 4px; background: var(--surface3); border-radius: 2px; overflow: hidden; margin-bottom: 4px; }
+.prog-fill { height: 100%; background: var(--accent); border-radius: 2px; transition: width .5s; }
+.prog-text { font-family: var(--mono); font-size: 11px; color: var(--muted2); }
+
+.module-group { padding: 0.5rem 0; }
+.module-label {
+  padding: 0.5rem 1.25rem;
+  font-family: var(--syne);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.lesson-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 1.25rem;
+  cursor: pointer;
+  transition: background .15s;
+  border-left: 2px solid transparent;
+  font-family: var(--syne);
+  font-size: 13px;
+  color: var(--muted2);
+  line-height: 1.3;
+}
+.lesson-item:hover { background: var(--surface2); }
+.lesson-item.active { background: var(--green-dim); border-left-color: var(--accent); color: var(--text); }
+.lesson-item.done { color: var(--muted2); }
+.lesson-num {
+  font-family: var(--mono);
+  font-size: 10px;
+  width: 22px; height: 22px;
+  min-width: 22px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  border: 1px solid var(--border2);
+  color: var(--muted);
+  flex-shrink: 0;
+}
+.lesson-item.active .lesson-num { background: var(--accent); border-color: var(--accent); color: #000; font-weight: 600; }
+.lesson-item.done .lesson-num { background: var(--surface3); border-color: var(--border2); color: var(--accent); }
+
+.overlay {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,.6);
+  z-index: 40;
+  display: none;
+}
+.overlay.show { display: block; }
+
+/* ── MAIN CONTENT ── */
+.main {
+  flex: 1;
+  margin-left: 0;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.topbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface);
+  position: sticky;
+  top: 0;
+  z-index: 30;
+}
+.menu-btn {
+  width: 36px; height: 36px;
+  background: var(--surface2);
+  border: 1px solid var(--border2);
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  flex-shrink: 0;
+  font-size: 16px;
+}
+.topbar-title {
+  font-family: var(--syne);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.topbar-badge {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--muted);
+  background: var(--surface3);
+  border: 1px solid var(--border2);
+  padding: 3px 8px;
+  border-radius: 20px;
+  flex-shrink: 0;
+}
+
+/* ── LESSON CONTENT ── */
+.lesson-content {
+  flex: 1;
+  padding: 1.5rem 1.25rem 6rem;
+  max-width: 680px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.lesson-header { margin-bottom: 2rem; }
+.lesson-module-tag {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 8px;
+}
+.lesson-title {
+  font-family: var(--syne);
+  font-size: 26px;
+  font-weight: 800;
+  line-height: 1.2;
+  color: var(--text);
+  margin-bottom: 10px;
+}
+.lesson-intro {
+  font-size: 15px;
+  color: var(--muted2);
+  line-height: 1.7;
+  font-style: italic;
+}
+
+/* Content blocks */
+.prose p { margin-bottom: 1rem; color: var(--muted2); font-size: 15px; }
+.prose p strong { color: var(--text); font-style: normal; }
+.prose h3 {
+  font-family: var(--syne);
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--text);
+  margin: 1.75rem 0 0.75rem;
+}
+
+.callout {
+  border-left: 3px solid;
+  padding: 12px 16px;
+  border-radius: 0 10px 10px 0;
+  margin: 1.25rem 0;
+  font-size: 14px;
+  line-height: 1.6;
+}
+.callout.green { border-color: var(--green); background: var(--green-dim); color: var(--text); }
+.callout.amber { border-color: var(--amber); background: var(--amber-dim); color: var(--text); }
+.callout.red { border-color: var(--red); background: var(--red-dim); color: var(--text); }
+.callout.blue { border-color: var(--blue); background: var(--blue-dim); color: var(--text); }
+.callout.purple { border-color: var(--purple); background: var(--purple-dim); color: var(--text); }
+.callout-title { font-family: var(--syne); font-size: 11px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; margin-bottom: 6px; }
+.callout.green .callout-title { color: var(--green); }
+.callout.amber .callout-title { color: var(--amber); }
+.callout.red .callout-title { color: var(--red); }
+.callout.blue .callout-title { color: var(--blue); }
+.callout.purple .callout-title { color: var(--purple); }
+
+.concept-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 1.25rem 0; }
+.concept-card {
+  background: var(--surface2);
+  border: 1px solid var(--border2);
+  border-radius: 12px;
+  padding: 14px;
+}
+.concept-card .icon { font-size: 22px; margin-bottom: 6px; }
+.concept-card .ctitle { font-family: var(--syne); font-size: 13px; font-weight: 700; color: var(--text); margin-bottom: 4px; }
+.concept-card .cdesc { font-size: 12px; color: var(--muted2); line-height: 1.5; font-family: var(--lora); }
+
+.table-wrap { overflow-x: auto; margin: 1.25rem 0; }
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+th {
+  font-family: var(--syne);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--muted);
+  padding: 8px 10px;
+  text-align: left;
+  border-bottom: 1px solid var(--border2);
+}
+td { padding: 10px; border-bottom: 1px solid var(--border); color: var(--muted2); font-size: 13px; vertical-align: top; }
+td strong { color: var(--text); }
+tr:last-child td { border-bottom: none; }
+tr:hover td { background: var(--surface2); }
+
+.mono-block {
+  background: var(--surface2);
+  border: 1px solid var(--border2);
+  border-radius: 10px;
+  padding: 14px 16px;
+  font-family: var(--mono);
+  font-size: 13px;
+  color: var(--green);
+  line-height: 1.8;
+  margin: 1.25rem 0;
+}
+.mono-block .comment { color: var(--muted); }
+
+.step-list { margin: 1.25rem 0; }
+.step-item {
+  display: flex;
+  gap: 14px;
+  margin-bottom: 14px;
+  align-items: flex-start;
+}
+.step-dot {
+  width: 28px; height: 28px; min-width: 28px;
+  border-radius: 50%;
+  background: var(--surface2);
+  border: 1px solid var(--accent);
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--accent);
+  margin-top: 2px;
+}
+.step-body { font-size: 14px; color: var(--muted2); line-height: 1.6; }
+.step-body strong { color: var(--text); display: block; font-family: var(--syne); font-size: 14px; margin-bottom: 2px; }
+
+/* Quiz */
+.quiz-block {
+  background: var(--surface2);
+  border: 1px solid var(--border2);
+  border-radius: 14px;
+  padding: 1.25rem;
+  margin: 1.5rem 0;
+}
+.quiz-title {
+  font-family: var(--syne);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--amber);
+  margin-bottom: 10px;
+}
+.quiz-q { font-size: 15px; color: var(--text); margin-bottom: 12px; line-height: 1.5; }
+.quiz-options { display: flex; flex-direction: column; gap: 6px; }
+.quiz-opt {
+  padding: 10px 14px;
+  border: 1px solid var(--border2);
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  color: var(--muted2);
+  transition: all .2s;
+  background: var(--surface);
+  font-family: var(--lora);
+}
+.quiz-opt:hover { border-color: var(--border2); background: var(--surface3); }
+.quiz-opt.correct { border-color: var(--green); background: var(--green-dim); color: var(--green); }
+.quiz-opt.wrong { border-color: var(--red); background: var(--red-dim); color: var(--red); }
+.quiz-opt.disabled { cursor: default; }
+.quiz-feedback { margin-top: 10px; font-size: 13px; padding: 8px 12px; border-radius: 8px; display: none; }
+.quiz-feedback.show { display: block; }
+.quiz-feedback.ok { background: var(--green-dim); color: var(--green); }
+.quiz-feedback.fail { background: var(--red-dim); color: var(--red); }
+
+/* Pattern visual */
+.pattern-viz {
+  background: var(--surface2);
+  border: 1px solid var(--border2);
+  border-radius: 14px;
+  padding: 1.25rem;
+  margin: 1.25rem 0;
+  text-align: center;
+}
+.pattern-viz svg { max-width: 100%; }
+.pattern-viz .viz-label {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--muted);
+  margin-top: 8px;
+  letter-spacing: .06em;
+}
+
+/* Bottom nav */
+.bottom-nav {
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+  padding: 0.875rem 1.25rem;
+  display: flex;
+  gap: 10px;
+  z-index: 30;
+}
+.nav-btn {
+  flex: 1;
+  padding: 11px;
+  border-radius: 10px;
+  font-family: var(--syne);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  text-align: center;
+  transition: all .2s;
+  border: 1px solid;
+}
+.nav-btn.prev { background: transparent; border-color: var(--border2); color: var(--muted2); }
+.nav-btn.prev:hover { background: var(--surface2); }
+.nav-btn.next { background: var(--green-dim); border-color: var(--green-border); color: var(--green); }
+.nav-btn.next:hover { background: rgba(0,255,170,0.15); }
+.nav-btn.done-btn { background: var(--green); border-color: var(--green); color: #000; }
+
+.lesson-done-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--green-dim);
+  border: 1px solid var(--green-border);
+  color: var(--green);
+  font-family: var(--mono);
+  font-size: 11px;
+  padding: 4px 10px;
+  border-radius: 20px;
+  margin-bottom: 1rem;
+}
+
+.divider { height: 1px; background: var(--border); margin: 1.5rem 0; }
+.spacer { height: 1rem; }
+
+/* Highlight box */
+.highlight {
+  background: var(--surface2);
+  border: 1px solid var(--border2);
+  border-radius: 12px;
+  padding: 1rem 1.25rem;
+  margin: 1.25rem 0;
+}
+.highlight .hl-num {
+  font-family: var(--mono);
+  font-size: 32px;
+  font-weight: 600;
+  color: var(--accent);
+  line-height: 1;
+}
+.highlight .hl-label { font-size: 12px; color: var(--muted); margin-top: 2px; }
+
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 1rem 0; }
+.info-card {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 12px;
+}
+.info-card .ic-label { font-family: var(--mono); font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: .08em; margin-bottom: 4px; }
+.info-card .ic-val { font-family: var(--syne); font-size: 15px; font-weight: 700; color: var(--text); }
+.info-card .ic-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+/* Responsive: desktop sidebar always open */
+@media (min-width: 900px) {
+  .sidebar { transform: translateX(0) !important; position: fixed; }
+  .main { margin-left: 280px; }
+  .overlay { display: none !important; }
+  .menu-btn { display: none; }
+}
+</style>
+</head>
+<body>
+
+<!-- Splash -->
+<div class="splash" id="splash">
+  <div class="splash-logo">8020</div>
+  <div class="splash-sub">Curso · De Cero a Futuros</div>
+  <div class="splash-bar"><div class="splash-fill"></div></div>
+</div>
+
+<div class="overlay" id="overlay" onclick="closeSidebar()"></div>
+
+<!-- Sidebar -->
+<div class="layout">
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-header">
+    <div class="sidebar-logo">8020</div>
+    <div class="sidebar-sub">De cero a futuros · Okala</div>
+  </div>
+  <div class="sidebar-progress">
+    <div class="prog-label">Tu progreso</div>
+    <div class="prog-bar"><div class="prog-fill" id="prog-fill" style="width:0%"></div></div>
+    <div class="prog-text" id="prog-text">0 de 14 lecciones</div>
+  </div>
+  <div id="sidebar-nav"></div>
+</aside>
+
+<!-- Main -->
+<main class="main">
+  <div class="topbar">
+    <div class="menu-btn" onclick="toggleSidebar()">☰</div>
+    <div class="topbar-title" id="topbar-title">Módulo 1 · Fundamentos</div>
+    <div class="topbar-badge" id="topbar-badge">L1</div>
+  </div>
+
+  <div class="lesson-content" id="lesson-content"></div>
+
+  <div class="bottom-nav">
+    <button class="nav-btn prev" onclick="prevLesson()">← Anterior</button>
+    <button class="nav-btn next" id="next-btn" onclick="nextLesson()">Siguiente →</button>
+  </div>
+</main>
+</div>
+
+<script>
+// ── DATA ──
+const modules = [
+  {
+    title: 'MÓDULO 1 · Fundamentos de Futuros',
+    color: 'blue',
+    lessons: [
+      {
+        id: 1,
+        title: 'El NQ y el MNQ — Tu nuevo campo de juego',
+        tag: 'Módulo 1 · Fundamentos',
+        intro: 'Antes de operar cualquier cosa, necesitas entender exactamente qué estás comprando y vendiendo. El NASDAQ Futures no es una acción ni un CFD — es algo diferente y más poderoso.',
+        content: `
+<div class="prose">
+<p>El <strong>NQ</strong> es el contrato de futuros del NASDAQ-100 que se negocia en el CME (Chicago Mercantile Exchange). Cuando ves el NASDAQ en las noticias — ese número de 20,000, 21,000 puntos — eso es exactamente lo que el NQ representa.</p>
+
+<h3>¿Cómo se mueve el NQ?</h3>
+<p>El NQ cotiza en <strong>cuartos de punto</strong> (0.25). Esto es fundamental para entender la estrategia 8020, porque los niveles 80 y 20 son precisamente dos de esos cuartos dentro de cada número entero.</p>
+</div>
+
+<div class="mono-block">
+<span class="comment"># Ejemplo de cotización NQ:</span>
+21,080.00  →  nivel 80
+21,060.00  →  nivel 60 (intermedio)
+21,020.00  →  nivel 20
+21,000.00  →  nivel 00
+</div>
+
+<div class="prose">
+<h3>El valor del dinero real</h3>
+<p>Aquí está lo que necesitas grabar en tu cabeza:</p>
+</div>
+
+<div class="concept-grid">
+  <div class="concept-card">
+    <div class="icon">📊</div>
+    <div class="ctitle">NQ — Full Size</div>
+    <div class="cdesc"><strong style="color:var(--green)">$20 por punto</strong><br>Stop 10 pts = $200 riesgo<br>TP1 15 pts = $300 ganancia</div>
+  </div>
+  <div class="concept-card">
+    <div class="icon">🔬</div>
+    <div class="ctitle">MNQ — Micro</div>
+    <div class="cdesc"><strong style="color:var(--amber)">$2 por punto</strong><br>Stop 10 pts = $20 riesgo<br>TP1 15 pts = $30 ganancia</div>
+  </div>
+</div>
+
+<div class="callout amber">
+  <div class="callout-title">⚡ Por qué empezar con el MNQ</div>
+  El MNQ es idéntico al NQ en todo — mismos niveles, misma estructura, misma estrategia 8020. La única diferencia es que cada punto vale $2 en lugar de $20. Perfecto para aprender sin que los errores duelan.
+</div>
+
+<div class="prose">
+<h3>¿Por qué futuros y no CFD?</h3>
+<p>La diferencia no es filosófica — es matemática y estructural:</p>
+</div>
+
+<div class="table-wrap">
+<table>
+  <tr><th>Aspecto</th><th>CFD</th><th>Futuros NQ</th></tr>
+  <tr><td>Tu contraparte</td><td>Tu broker (gana si pierdes)</td><td><strong>El mercado</strong> (broker neutral)</td></tr>
+  <tr><td>Precio</td><td>Cada broker lo define</td><td><strong>Único</strong> — CME para todos</td></tr>
+  <tr><td>Costo real</td><td>Spread oculto variable</td><td><strong>Comisión fija</strong> ~$0.50-2/contrato</td></tr>
+  <tr><td>Niveles 8020</td><td>Pueden no reaccionar igual</td><td><strong>Reaccionan</strong> — precio centralizado</td></tr>
+  <tr><td>Prop firms serias</td><td>Pocas y menos reguladas</td><td><strong>Apex, Topstep</strong> — pagos reales</td></tr>
+</table>
+</div>
+
+<div class="callout green">
+  <div class="callout-title">✓ La conclusión clave</div>
+  Los niveles 80 y 20 de la estrategia de Okala funcionan precisamente porque el NQ tiene un precio centralizado. Todos los participantes del mercado ven exactamente el mismo número, entonces todos reaccionan al mismo nivel. En CFD esto no está garantizado.
+</div>
+
+<div class="quiz-block">
+  <div class="quiz-title">🧠 Verifica tu comprensión</div>
+  <div class="quiz-q">Si tienes 3 contratos de MNQ y el precio se mueve 10 puntos a tu favor, ¿cuánto ganas?</div>
+  <div class="quiz-options">
+    <div class="quiz-opt" onclick="answer(this, false)">$200</div>
+    <div class="quiz-opt" onclick="answer(this, true)">$60</div>
+    <div class="quiz-opt" onclick="answer(this, false)">$600</div>
+    <div class="quiz-opt" onclick="answer(this, false)">$20</div>
+  </div>
+  <div class="quiz-feedback" id="qfeed">3 contratos × 10 puntos × $2 por punto = $60. ¡Correcto!</div>
+</div>
+`
+      },
+      {
+        id: 2,
+        title: 'La plataforma — Tradovate demo paso a paso',
+        tag: 'Módulo 1 · Fundamentos',
+        intro: 'Una plataforma de futuros puede parecer intimidante al principio. Vamos a desmitificarla completamente.',
+        content: `
+<div class="prose">
+<p>Para practicar con futuros reales en demo, la plataforma más accesible para empezar es <strong>Tradovate</strong>. Es gratuita, tiene demo ilimitada y puedes usarla desde el navegador sin instalar nada.</p>
+</div>
+
+<div class="callout blue">
+  <div class="callout-title">📋 Cómo abrir la demo</div>
+  1. Ve a <strong>tradovate.com</strong><br>
+  2. Click en "Start Free Trial"<br>
+  3. Crea tu cuenta<br>
+  4. En la plataforma, selecciona cuenta <strong>"Sim" o "Demo"</strong><br>
+  5. Busca el contrato <strong>MNQH5</strong> o simplemente escribe "MNQ"
+</div>
+
+<div class="prose">
+<h3>Las 5 partes que necesitas conocer</h3>
+</div>
+
+<div class="step-list">
+  <div class="step-item">
+    <div class="step-dot">1</div>
+    <div class="step-body">
+      <strong>El gráfico</strong>
+      Aquí ves el precio. Configúralo en <strong>10 minutos</strong> para el panorama general. Luego abre otro en <strong>200 segundos</strong> para las entradas. Estos son los dos timeframes de Okala.
+    </div>
+  </div>
+  <div class="step-item">
+    <div class="step-dot">2</div>
+    <div class="step-body">
+      <strong>El DOM (Depth of Market)</strong>
+      Muestra las órdenes de compra y venta en tiempo real. Por ahora no lo necesitas — Okala opera sin order flow. Solo mira el precio.
+    </div>
+  </div>
+  <div class="step-item">
+    <div class="step-dot">3</div>
+    <div class="step-body">
+      <strong>El panel de órdenes</strong>
+      Aquí colocas tus entradas. Tienes tres tipos: Market (entra ya), Limit (entra a precio específico) y Stop (para protegerte). La siguiente lección los explica en detalle.
+    </div>
+  </div>
+  <div class="step-item">
+    <div class="step-dot">4</div>
+    <div class="step-body">
+      <strong>Posiciones abiertas</strong>
+      Te muestra qué tienes abierto, tu P&L flotante, y desde dónde entraste. Revísalo constantemente mientras tengas una operación activa.
+    </div>
+  </div>
+  <div class="step-item">
+    <div class="step-dot">5</div>
+    <div class="step-body">
+      <strong>El historial del día</strong>
+      Al final de la sesión revisa aquí todas tus operaciones. Fecha, hora, precio de entrada, precio de salida, resultado. Esto es tu diario automático.
+    </div>
+  </div>
+</div>
+
+<div class="prose">
+<h3>Configuración inicial recomendada</h3>
+</div>
+
+<div class="mono-block">
+Contrato:     MNQ (Micro NASDAQ Futures)
+Gráfico 1:    10 minutos  → estructura general
+Gráfico 2:    200 segundos → entradas exactas
+Velas:        Japonesas (candlestick)
+Indicadores:  NINGUNO (la estrategia 8020 es price action puro)
+</div>
+
+<div class="callout amber">
+  <div class="callout-title">⚠ Error más común al empezar</div>
+  Llenar el gráfico de indicadores porque "más información es mejor". Okala usa cero indicadores. Tu ventaja viene de leer el precio y los niveles, no de medias móviles ni RSI. Mantenlo limpio.
+</div>
+
+<div class="quiz-block">
+  <div class="quiz-title">🧠 Verifica tu comprensión</div>
+  <div class="quiz-q">¿Cuál es la razón principal por la que la estrategia 8020 no usa indicadores?</div>
+  <div class="quiz-options">
+    <div class="quiz-opt" onclick="answer(this, false)">Los indicadores son muy complicados de configurar</div>
+    <div class="quiz-opt" onclick="answer(this, true)">La ventaja está en leer precio y velocidad directamente, sin filtros</div>
+    <div class="quiz-opt" onclick="answer(this, false)">La plataforma Tradovate no tiene indicadores</div>
+    <div class="quiz-opt" onclick="answer(this, false)">Los indicadores solo funcionan en CFD</div>
+  </div>
+  <div class="quiz-feedback" id="qfeed">Exacto. Okala dice que su ventaja viene de "leer el precio real y el movimiento y la velocidad a la que sucede". Los indicadores añaden un retraso que elimina esa ventaja.</div>
+</div>
+`
+      },
+      {
+        id: 3,
+        title: 'Órdenes — Cómo entrar y salir del mercado',
+        tag: 'Módulo 1 · Fundamentos',
+        intro: 'Conocer los tipos de órdenes no es opcional — es la diferencia entre entrar donde planeaste y entrar donde el mercado quiso.',
+        content: `
+<div class="prose">
+<p>En futuros tienes tres tipos de órdenes fundamentales. Okala usa principalmente dos de ellos — y tiene una razón específica para cada uno.</p>
+</div>
+
+<div class="concept-grid">
+  <div class="concept-card">
+    <div class="icon">⚡</div>
+    <div class="ctitle">Market Order</div>
+    <div class="cdesc">Entra <strong>inmediatamente</strong> al precio disponible. Usada cuando Okala ve una reacción instantánea y quiere capturarla ahora.</div>
+  </div>
+  <div class="concept-card">
+    <div class="icon">🎯</div>
+    <div class="ctitle">Limit Order</div>
+    <div class="cdesc">Entra <strong>a un precio específico</strong> o mejor. Okala la usa para colocar su entrada en el nivel 80 o 20 con anticipación.</div>
+  </div>
+  <div class="concept-card">
+    <div class="icon">🛡️</div>
+    <div class="ctitle">Stop Loss</div>
+    <div class="cdesc">Sale automáticamente si el precio va <strong>10 puntos en contra</strong>. La regla más importante de la estrategia.</div>
+  </div>
+  <div class="concept-card">
+    <div class="icon">💰</div>
+    <div class="ctitle">Take Profit</div>
+    <div class="cdesc">Sale automáticamente cuando llegas a <strong>15 puntos de ganancia</strong> (TP1). Protege la operación.</div>
+  </div>
+</div>
+
+<div class="prose">
+<h3>Cómo Okala usa las órdenes en la práctica</h3>
+</div>
+
+<div class="callout green">
+  <div class="callout-title">✓ Escenario 1 — Entrada con Limit (lo más común)</div>
+  El precio se acerca al nivel 20. Okala coloca una <strong>orden límite de compra en 20</strong> con el stop ya configurado 10 puntos abajo. Si el precio llega, entra automáticamente. Si no llega del todo (se queda en 23 por ejemplo), cancela y espera el siguiente nivel — <strong>nunca persigue</strong>.
+</div>
+
+<div class="callout blue">
+  <div class="callout-title">📌 Escenario 2 — Entrada con Market (reacción inmediata)</div>
+  El precio toca el nivel, ve una reacción instantánea fuerte. Entra <strong>a mercado</strong> para no perder el movimiento. Esto puede costar 1-2 puntos más de slippage pero garantiza la entrada.
+</div>
+
+<div class="prose">
+<h3>La secuencia exacta de una operación</h3>
+</div>
+
+<div class="step-list">
+  <div class="step-item">
+    <div class="step-dot">1</div>
+    <div class="step-body"><strong>Identificar el nivel</strong> — Precio cerca del 80 o 20</div>
+  </div>
+  <div class="step-item">
+    <div class="step-dot">2</div>
+    <div class="step-body"><strong>Ver la reacción</strong> — ¿El precio rebota o perfora?</div>
+  </div>
+  <div class="step-item">
+    <div class="step-dot">3</div>
+    <div class="step-body"><strong>Entrar</strong> — Limit anticipada o Market si ya reaccionó</div>
+  </div>
+  <div class="step-item">
+    <div class="step-dot">4</div>
+    <div class="step-body"><strong>Stop inmediato</strong> — 10 puntos en contra, sin excepción</div>
+  </div>
+  <div class="step-item">
+    <div class="step-dot">5</div>
+    <div class="step-body"><strong>TP1 en 15 puntos</strong> — Cierra primera posición, cubre riesgo</div>
+  </div>
+  <div class="step-item">
+    <div class="step-dot">6</div>
+    <div class="step-body"><strong>Mover stop a equilibrio</strong> — La operación ya no puede perder</div>
+  </div>
+  <div class="step-item">
+    <div class="step-dot">7</div>
+    <div class="step-body"><strong>Dejar correr</strong> — Resto de la posición va al imán o continúa con momentum</div>
+  </div>
+</div>
+
+<div class="callout red">
+  <div class="callout-title">⛔ La regla del stop que Okala nunca rompe</div>
+  "Si me equivoco por 10 puntos, lo más probable es que me equivoque por 50 o 100." — Okala. El stop de 10 puntos no es negociable. Si el setup requiere un stop mayor, el setup no es válido.
+</div>
+
+<div class="quiz-block">
+  <div class="quiz-title">🧠 Verifica tu comprensión</div>
+  <div class="quiz-q">Colocas una orden límite de compra en el nivel 20. El precio llega hasta 23 y rebota con fuerza. ¿Qué haces según la estrategia 8020?</div>
+  <div class="quiz-options">
+    <div class="quiz-opt" onclick="answer(this, false)">Subo la orden límite a 23 para no perder el movimiento</div>
+    <div class="quiz-opt" onclick="answer(this, false)">Entro a mercado corriendo el precio</div>
+    <div class="quiz-opt" onclick="answer(this, true)">Cancelo la orden y espero el siguiente nivel o estructura</div>
+    <div class="quiz-opt" onclick="answer(this, false)">Amplío el stop a 20 puntos para dar más margen</div>
+  </div>
+  <div class="quiz-feedback" id="qfeed">Correcto. Okala dice explícitamente: "No vas a dejar tu orden límite ahí esperando que vuelva a 20, te lo perdiste." La disciplina es esperar el siguiente setup limpio.</div>
+</div>
+`
+      },
+      {
+        id: 4,
+        title: 'Gestión de riesgo — Las reglas del juego prop',
+        tag: 'Módulo 1 · Fundamentos',
+        intro: 'El riesgo no es lo que pierdes en una operación. Es lo que puede acabar con tu cuenta entera. Estas reglas existen para que eso nunca pase.',
+        content: `
+<div class="prose">
+<p>La gestión de riesgo en futuros tiene dos dimensiones: la de tu operación individual y la de las reglas de la prop firm. Las dos son igual de importantes.</p>
+
+<h3>Por operación — Las matemáticas de Okala</h3>
+</div>
+
+<div class="two-col">
+  <div class="info-card">
+    <div class="ic-label">Stop fijo</div>
+    <div class="ic-val">10 pts</div>
+    <div class="ic-sub">NQ: $200 · MNQ: $20</div>
+  </div>
+  <div class="info-card">
+    <div class="ic-label">TP1 mínimo</div>
+    <div class="ic-val">15 pts</div>
+    <div class="ic-sub">NQ: $300 · MNQ: $30</div>
+  </div>
+  <div class="info-card">
+    <div class="ic-label">R:R mínimo</div>
+    <div class="ic-val">1.5:1</div>
+    <div class="ic-sub">Solo en el primer TP</div>
+  </div>
+  <div class="info-card">
+    <div class="ic-label">Win Rate objetivo</div>
+    <div class="ic-val">70%</div>
+    <div class="ic-sub">Con consistencia</div>
+  </div>
+</div>
+
+<div class="prose">
+<h3>¿Qué es el margen en futuros?</h3>
+<p>El margen es el dinero que necesitas tener en tu cuenta para poder abrir un contrato. No es lo que pagas — es una garantía. Al cerrar la operación, el margen se libera y solo te quedas con la ganancia o pérdida.</p>
+</div>
+
+<div class="mono-block">
+<span class="comment"># Ejemplo con MNQ:</span>
+Margen requerido por contrato:  ~$40-100 (en demo es simbólico)
+Valor total del contrato:       ~$42,000
+Tu riesgo real por operación:   $20 (stop de 10 pts × $2)
+
+<span class="comment"># Esto es el apalancamiento:</span>
+Controlas $42,000 con $40 de margen
+Pero tu riesgo está definido por el STOP, no por el tamaño
+</div>
+
+<div class="callout amber">
+  <div class="callout-title">⚠ El apalancamiento no es el enemigo — el stop ausente sí</div>
+  El apalancamiento solo es peligroso sin stop loss. Con stop de 10 puntos en MNQ, tu riesgo máximo por contrato es $20, sin importar cuánto valga el contrato total.
+</div>
+
+<div class="prose">
+<h3>Las reglas de las prop firms</h3>
+<p>Cuando operes con una firma como Apex o Topstep, tendrás dos reglas críticas adicionales:</p>
+</div>
+
+<div class="step-list">
+  <div class="step-item">
+    <div class="step-dot">1</div>
+    <div class="step-body">
+      <strong>Drawdown máximo diario</strong>
+      Si pierdes cierta cantidad en un día (ej: $1,000), la cuenta se bloquea automáticamente por el día. Okala evita esto operando con stops fijos y no forzando entradas malas.
+    </div>
+  </div>
+  <div class="step-item">
+    <div class="step-dot">2</div>
+    <div class="step-body">
+      <strong>Regla de consistencia</strong>
+      Tu mejor día no puede ser desproporcionadamente grande vs tu promedio diario. Si ganas $5,000 en un día cuando tu promedio es $300, podrías violar esta regla aunque estés en ganancias. Por eso Okala no deja correr sin límite cuando ya cumplió el objetivo.
+    </div>
+  </div>
+</div>
+
+<div class="callout green">
+  <div class="callout-title">✓ La mentalidad correcta para prop trading</div>
+  No estás tratando de ganar lo máximo posible en un día. Estás construyendo un historial de consistencia que demuestra que eres un trader profesional. Los pagos grandes vienen de la acumulación de días consistentes, no de un home run.
+</div>
+
+<div class="quiz-block">
+  <div class="quiz-title">🧠 Verifica tu comprensión</div>
+  <div class="quiz-q">Tienes 3 contratos de MNQ, entras en long y el precio va 15 puntos a tu favor. ¿Cuánto ganaste en TP1 y qué haces inmediatamente después?</div>
+  <div class="quiz-options">
+    <div class="quiz-opt" onclick="answer(this, false)">Gané $90, dejo correr todo</div>
+    <div class="quiz-opt" onclick="answer(this, true)">Gané $90 en total, cierro parte y muevo stop a equilibrio</div>
+    <div class="quiz-opt" onclick="answer(this, false)">Gané $300, cierro todo inmediatamente</div>
+    <div class="quiz-opt" onclick="answer(this, false)">Gané $45, amplío el stop</div>
+  </div>
+  <div class="quiz-feedback" id="qfeed">Correcto. 3 contratos × 15 puntos × $2 = $90. Después del TP1, cierras al menos parte de la posición y mueves el stop de los contratos restantes a tu precio de entrada (punto de equilibrio). La operación ya no puede perder dinero.</div>
+</div>
+`
+      }
+    ]
+  },
+  {
+    title: 'MÓDULO 2 · La Estrategia 8020',
+    color: 'green',
+    lessons: [
+      {
+        id: 5,
+        title: 'Los niveles 80 y 20 — Por qué el mercado los respeta',
+        tag: 'Módulo 2 · Estrategia 8020',
+        intro: 'No son números mágicos. Hay una razón estructural por la que el NASDAQ reacciona en estos niveles una y otra vez.',
+        content: `
+<div class="prose">
+<p>El NASDAQ-100 Futures (NQ) cotiza en incrementos de 0.25 puntos. Esto significa que dentro de cada número redondo — digamos 21,000 — hay cuatro precios posibles: 21,000.00, 21,000.25, 21,000.50 y 21,000.75.</p>
+
+<p>A lo largo de años operando, Okala identificó que <strong>los números terminados en 80 y 20</strong> son los que más consistentemente generan reacciones en el mercado. No es casualidad — es la concentración de órdenes institucionales.</p>
+</div>
+
+<div class="pattern-viz">
+  <svg viewBox="0 0 320 200" xmlns="http://www.w3.org/2000/svg">
+    <!-- Background -->
+    <rect width="320" height="200" fill="#16162a" rx="8"/>
+    <!-- Grid lines -->
+    <line x1="40" y1="30" x2="300" y2="30" stroke="#1e1e35" stroke-width="1"/>
+    <line x1="40" y1="75" x2="300" y2="75" stroke="#00ffaa" stroke-width="1" stroke-dasharray="4,2" opacity="0.6"/>
+    <line x1="40" y1="120" x2="300" y2="120" stroke="#1e1e35" stroke-width="1"/>
+    <line x1="40" y1="165" x2="300" y2="165" stroke="#00ffaa" stroke-width="1" stroke-dasharray="4,2" opacity="0.6"/>
+    <!-- Labels -->
+    <text x="10" y="34" fill="#4040a0" font-size="9" font-family="monospace">100</text>
+    <text x="10" y="79" fill="#00ffaa" font-size="9" font-family="monospace">080</text>
+    <text x="10" y="124" fill="#4040a0" font-size="9" font-family="monospace">060</text>
+    <text x="10" y="169" fill="#00ffaa" font-size="9" font-family="monospace">020</text>
+    <!-- Price line moving up -->
+    <polyline points="50,150 90,130 110,140 140,90 160,80 180,72 200,78 220,70 240,65" fill="none" stroke="#60a5fa" stroke-width="2"/>
+    <!-- Reaction at 80 -->
+    <circle cx="180" cy="75" r="5" fill="#00ffaa" opacity="0.8"/>
+    <text x="188" y="68" fill="#00ffaa" font-size="8">Reacción</text>
+    <!-- Price line going down from 80 -->
+    <polyline points="240,65 260,75 270,80 280,160 290,168" fill="none" stroke="#60a5fa" stroke-width="2" stroke-dasharray="3,2"/>
+    <!-- Reaction at 20 -->
+    <circle cx="290" cy="165" r="5" fill="#00ffaa" opacity="0.8"/>
+    <text x="255" y="185" fill="#00ffaa" font-size="8">Reacción en 20</text>
+  </svg>
+  <div class="viz-label">El precio sube → toca 80 → reacciona a la baja → cae a 20 → reacciona al alza</div>
+</div>
+
+<div class="prose">
+<h3>¿Por qué estos niveles y no otros?</h3>
+<p>Los participantes institucionales (fondos, market makers, bancos) colocan sus órdenes en niveles redondos y sus fracciones más significativas. El 80 y el 20 son exactamente 4/5 y 1/5 de la distancia entre números enteros — niveles psicológicamente prominentes donde se concentran las órdenes.</p>
+
+<h3>Los niveles intermedios</h3>
+<p>Okala menciona que también existen niveles intermedios (60, 40, etc.), pero los grandes, los que dan las mejores reacciones con mayor consistencia, son el 80 y el 20. Para empezar, enfócate solo en estos dos.</p>
+</div>
+
+<div class="callout green">
+  <div class="callout-title">✓ Cómo identificarlos en el gráfico</div>
+  Si el precio está en 21,347 — olvida el 347. Solo mira los últimos dos dígitos antes del decimal: <strong>47</strong>. ¿Está cerca del 80? ¿Del 20? Eso es todo lo que necesitas saber. El nivel más cercano es tu zona de interés.
+</div>
+
+<div class="callout amber">
+  <div class="callout-title">⚠ El nivel no tiene que tocarse exactamente</div>
+  Si el precio viene subiendo con fuerza hacia el 80 y vendedores entran en 77, el precio puede rebotar desde 77 sin llegar al 80. Okala dice: "Si hizo un movimiento de 100 puntos hacia abajo desde 78, no vas a esperar a que llegue a 80." Lee la velocidad y la reacción, no solo el número exacto.
+</div>
+
+<div class="quiz-block">
+  <div class="quiz-title">🧠 Verifica tu comprensión</div>
+  <div class="quiz-q">El NQ está cotizando en 21,483. ¿Cuáles son los dos niveles 8020 más relevantes que debes tener marcados?</div>
+  <div class="quiz-options">
+    <div class="quiz-opt" onclick="answer(this, false)">21,400 y 21,500</div>
+    <div class="quiz-opt" onclick="answer(this, true)">21,480 y 21,420</div>
+    <div class="quiz-opt" onclick="answer(this, false)">21,483 y 21,500</div>
+    <div class="quiz-opt" onclick="answer(this, false)">21,450 y 21,460</div>
+  </div>
+  <div class="quiz-feedback" id="qfeed">Correcto. Ignorando el número base 21,400, los dos grandes niveles son el 80 (21,480) y el 20 (21,420). El precio en 21,483 está apenas 3 puntos por encima del nivel 80.</div>
+</div>
+`
+      },
+      {
+        id: 6,
+        title: 'La Horquilla (Fork) — El patrón de reversión',
+        tag: 'Módulo 2 · Estrategia 8020',
+        intro: 'El primer patrón de estructura. Busca compradores atrapados vendiendo y vendedores tardíos que van a quedar expuestos.',
+        content: `
+<div class="prose">
+<p>La Horquilla o Fork es el patrón de <strong>reversión al alza</strong> de la estrategia 8020. Se forma cuando el mercado ha caído con fuerza y empieza a mostrar señales de agotamiento de los vendedores.</p>
+
+<h3>¿Cómo se ve?</h3>
+</div>
+
+<div class="pattern-viz">
+  <svg viewBox="0 0 320 220" xmlns="http://www.w3.org/2000/svg">
+    <rect width="320" height="220" fill="#16162a" rx="8"/>
+    <!-- Nivel 20 -->
+    <line x1="20" y1="160" x2="300" y2="160" stroke="#00ffaa" stroke-width="1" stroke-dasharray="4,2" opacity="0.5"/>
+    <text x="4" y="163" fill="#00ffaa" font-size="8" font-family="monospace">20</text>
+    <!-- Caída fuerte -->
+    <rect x="50" y="30" width="14" height="60" fill="#ff4d6d" rx="2"/>
+    <line x1="57" y1="20" x2="57" y2="30" stroke="#ff4d6d" stroke-width="1.5"/>
+    <line x1="57" y1="90" x2="57" y2="100" stroke="#ff4d6d" stroke-width="1.5"/>
+    <rect x="70" y="60" width="14" height="80" fill="#ff4d6d" rx="2"/>
+    <line x1="77" y1="50" x2="77" y2="60" stroke="#ff4d6d" stroke-width="1.5"/>
+    <line x1="77" y1="140" x2="77" y2="155" stroke="#ff4d6d" stroke-width="1.5"/>
+    <!-- Texto -->
+    <text x="45" y="15" fill="#ff4d6d" font-size="8">Caída fuerte</text>
+    <!-- Vela de agotamiento (mecha larga) -->
+    <rect x="92" y="135" width="14" height="20" fill="#ff4d6d" rx="2"/>
+    <line x1="99" y1="115" x2="99" y2="135" stroke="#ff4d6d" stroke-width="1.5"/>
+    <line x1="99" y1="155" x2="99" y2="175" stroke="#ff4d6d" stroke-width="1.5"/>
+    <text x="82" y="182" fill="#ffcc44" font-size="7.5">Mecha larga</text>
+    <text x="82" y="192" fill="#ffcc44" font-size="7.5">+ cuerpo chico</text>
+    <!-- Vela de iniciación - no rompe mínimo -->
+    <rect x="114" y="138" width="14" height="15" fill="#00e5a0" rx="2"/>
+    <line x1="121" y1="130" x2="121" y2="138" stroke="#00e5a0" stroke-width="1.5"/>
+    <line x1="121" y1="153" x2="121" y2="162" stroke="#00e5a0" stroke-width="1.5"/>
+    <text x="108" y="175" fill="#00ffaa" font-size="7.5">No rompe</text>
+    <text x="108" y="185" fill="#00ffaa" font-size="7.5">el mínimo</text>
+    <!-- Flecha entrada -->
+    <text x="138" y="148" fill="#00ffaa" font-size="20">→</text>
+    <text x="135" y="168" fill="#00ffaa" font-size="7.5">ENTRADA</text>
+    <!-- Subida -->
+    <rect x="165" y="120" width="12" height="25" fill="#00e5a0" rx="2"/>
+    <line x1="171" y1="105" x2="171" y2="120" stroke="#00e5a0" stroke-width="1.5"/>
+    <rect x="182" y="90" width="12" height="28" fill="#00e5a0" rx="2"/>
+    <line x1="188" y1="75" x2="188" y2="90" stroke="#00e5a0" stroke-width="1.5"/>
+    <rect x="199" y="60" width="12" height="25" fill="#00e5a0" rx="2"/>
+    <line x1="205" y1="45" x2="205" y2="60" stroke="#00e5a0" stroke-width="1.5"/>
+    <!-- TP1 -->
+    <line x1="165" y1="105" x2="230" y2="105" stroke="#ffcc44" stroke-width="1" stroke-dasharray="3,2"/>
+    <text x="232" y="108" fill="#ffcc44" font-size="8">TP1 +15pts</text>
+    <!-- Stop -->
+    <line x1="92" y1="178" x2="230" y2="178" stroke="#ff4d6d" stroke-width="1" stroke-dasharray="3,2"/>
+    <text x="232" y="181" fill="#ff4d6d" font-size="8">Stop −10pts</text>
+  </svg>
+  <div class="viz-label">Fork: caída fuerte → mecha larga → vela siguiente no rompe mínimo → entrada larga</div>
+</div>
+
+<div class="prose">
+<h3>Los 4 elementos que debes ver</h3>
+</div>
+
+<div class="step-list">
+  <div class="step-item">
+    <div class="step-dot">1</div>
+    <div class="step-body"><strong>Movimiento fuerte a la baja</strong> — 100 a 150 puntos desde la apertura. Los vendedores han dominado.</div>
+  </div>
+  <div class="step-item">
+    <div class="step-dot">2</div>
+    <div class="step-body"><strong>Vela de agotamiento</strong> — Mecha larga hacia abajo con cuerpo pequeño. Los vendedores están perdiendo fuerza, compradores están entrando en el extremo.</div>
+  </div>
+  <div class="step-item">
+    <div class="step-dot">3</div>
+    <div class="step-body"><strong>Vela de iniciación</strong> — La siguiente vela intenta perforar el mínimo pero falla. Cierra por encima. Este es tu semáforo en verde.</div>
+  </div>
+  <div class="step-item">
+    <div class="step-dot">4</div>
+    <div class="step-body"><strong>Idealmente en nivel 8020</strong> — Si todo esto ocurre en el 20 o el 80, la confluencia es máxima. El nivel refuerza el patrón.</div>
+  </div>
+</div>
+
+<div class="callout purple">
+  <div class="callout-title">🧠 La psicología detrás del Fork</div>
+  Los vendedores tardíos se quedaron atrapados en corto cerca del mínimo. Cuando el precio no puede seguir bajando, necesitan cerrar sus posiciones comprando — lo que impulsa el precio hacia arriba. El Fork captura exactamente ese momento de pánico del vendedor tardío.
+</div>
+
+<div class="quiz-block">
+  <div class="quiz-title">🧠 Verifica tu comprensión</div>
+  <div class="quiz-q">Ves una vela con mecha muy larga hacia abajo y cuerpo pequeño cerca del nivel 20. La siguiente vela toca el mínimo de la anterior y cierra por encima. ¿Qué tienes?</div>
+  <div class="quiz-options">
+    <div class="quiz-opt" onclick="answer(this, false)">Una señal de continuación bajista</div>
+    <div class="quiz-opt" onclick="answer(this, true)">Un setup Fork completo — entrada larga con stop bajo el mínimo</div>
+    <div class="quiz-opt" onclick="answer(this, false)">Un patrón H en formación</div>
+    <div class="quiz-opt" onclick="answer(this, false)">Hay que esperar más confirmación</div>
+  </div>
+  <div class="quiz-feedback" id="qfeed">¡Correcto! Tienes todos los elementos del Fork: caída previa, vela de agotamiento (mecha larga + cuerpo pequeño), y vela de iniciación que no rompe el mínimo. La entrada es al alza con stop 10 puntos bajo el mínimo.</div>
+</div>
+`
+      },
+      {
+        id: 7,
+        title: 'El Patrón H — Continuación bajista',
+        tag: 'Módulo 2 · Estrategia 8020',
+        intro: 'Okala dice que odia las tendencias alcistas. El patrón H es su favorito precisamente porque captura la continuación bajista cuando el mercado finge una recuperación.',
+        content: `
+<div class="prose">
+<p>El Patrón H no es una reversión — es una <strong>continuación de tendencia bajista</strong>. El mercado finge que va a recuperarse, forma la letra H, y luego sigue cayendo. Okala entra en corto durante esa falsa recuperación.</p>
+
+<h3>La forma de la H</h3>
+</div>
+
+<div class="pattern-viz">
+  <svg viewBox="0 0 320 220" xmlns="http://www.w3.org/2000/svg">
+    <rect width="320" height="220" fill="#16162a" rx="8"/>
+    <!-- Nivel 80 -->
+    <line x1="20" y1="60" x2="300" y2="60" stroke="#00ffaa" stroke-width="1" stroke-dasharray="4,2" opacity="0.5"/>
+    <text x="4" y="63" fill="#00ffaa" font-size="8" font-family="monospace">80</text>
+    <!-- Nivel 20 -->
+    <line x1="20" y1="165" x2="300" y2="165" stroke="#00ffaa" stroke-width="1" stroke-dasharray="4,2" opacity="0.5"/>
+    <text x="4" y="168" fill="#00ffaa" font-size="8" font-family="monospace">20</text>
+    <!-- Primera caída (pierna izquierda de H) -->
+    <rect x="35" y="40" width="12" height="50" fill="#ff4d6d" rx="2"/>
+    <rect x="52" y="60" width="12" height="70" fill="#ff4d6d" rx="2"/>
+    <rect x="69" y="80" width="12" height="80" fill="#ff4d6d" rx="2"/>
+    <text x="30" y="30" fill="#ff4d6d" font-size="8">Caída 1</text>
+    <!-- Rebote (barra H) -->
+    <rect x="90" y="120" width="12" height="30" fill="#00e5a0" rx="2"/>
+    <line x1="96" y1="100" x2="96" y2="120" stroke="#00e5a0" stroke-width="1.5"/>
+    <rect x="107" y="100" width="12" height="35" fill="#00e5a0" rx="2"/>
+    <line x1="113" y1="85" x2="113" y2="100" stroke="#00e5a0" stroke-width="1.5"/>
+    <line x1="113" y1="135" x2="113" y2="148" stroke="#00e5a0" stroke-width="1.5"/>
+    <!-- Mecha que toca 80 pero no supera -->
+    <rect x="124" y="90" width="12" height="25" fill="#ff4d6d" rx="2"/>
+    <line x1="130" y1="62" x2="130" y2="90" stroke="#ff4d6d" stroke-width="1.5"/>
+    <line x1="130" y1="115" x2="130" y2="130" stroke="#ff4d6d" stroke-width="1.5"/>
+    <text x="118" y="52" fill="#ffcc44" font-size="7.5">Toca 80</text>
+    <text x="112" y="42" fill="#ffcc44" font-size="7.5">no lo supera</text>
+    <!-- Barra de la H -->
+    <line x1="81" y1="140" x2="136" y2="140" stroke="#c084fc" stroke-width="1.5" stroke-dasharray="3,2"/>
+    <text x="140" y="143" fill="#c084fc" font-size="7.5">La H</text>
+    <!-- Entrada corta -->
+    <text x="148" y="100" fill="#ff4d6d" font-size="20">→</text>
+    <text x="145" y="118" fill="#ff4d6d" font-size="7.5">ENTRADA</text>
+    <text x="143" y="127" fill="#ff4d6d" font-size="7.5">CORTA</text>
+    <!-- Segunda caída (pierna derecha de H) -->
+    <rect x="175" y="100" width="12" height="45" fill="#ff4d6d" rx="2"/>
+    <rect x="192" y="120" width="12" height="55" fill="#ff4d6d" rx="2"/>
+    <rect x="209" y="140" width="12" height="35" fill="#ff4d6d" rx="2"/>
+    <!-- TP1 -->
+    <line x1="175" y1="130" x2="270" y2="130" stroke="#ffcc44" stroke-width="1" stroke-dasharray="3,2"/>
+    <text x="232" y="128" fill="#ffcc44" font-size="8">TP1 +15pts</text>
+    <!-- Stop -->
+    <line x1="175" y1="80" x2="270" y2="80" stroke="#ff4d6d" stroke-width="1" stroke-dasharray="3,2" opacity="0.7"/>
+    <text x="232" y="78" fill="#ff4d6d" font-size="8">Stop −10pts</text>
+  </svg>
+  <div class="viz-label">Caída → rebote a 80 con mecha → no hace máximo más alto → H formada → entrada corta</div>
+</div>
+
+<div class="prose">
+<h3>Los 4 elementos del Patrón H</h3>
+</div>
+
+<div class="step-list">
+  <div class="step-item">
+    <div class="step-dot">1</div>
+    <div class="step-body"><strong>Primera caída fuerte</strong> — El mercado cae desde la apertura. Hay sesgo bajista claro.</div>
+  </div>
+  <div class="step-item">
+    <div class="step-dot">2</div>
+    <div class="step-body"><strong>Rebote hacia arriba</strong> — El precio sube, pero con fuerza limitada. Sube hacia el nivel 80.</div>
+  </div>
+  <div class="step-item">
+    <div class="step-dot">3</div>
+    <div class="step-body"><strong>No hace máximo más alto</strong> — La clave. El precio toca el 80 con una mecha pero no lo supera con cuerpo. Los compradores no tienen suficiente fuerza.</div>
+  </div>
+  <div class="step-item">
+    <div class="step-dot">4</div>
+    <div class="step-body"><strong>Rollover (giro a la baja)</strong> — La vela empieza a caer de nuevo. Esta es tu señal para entrar en corto — en el retest del nivel 80 o en la sección transversal.</div>
+  </div>
+</div>
+
+<div class="callout purple">
+  <div class="callout-title">🧠 La psicología detrás de la H</div>
+  Los compradores tardíos vieron el rebote y compraron esperando una reversión. El precio llega hasta el 80, parece que va a superar, pero los vendedores institucionales estaban esperando exactamente ahí. El comprador tardío queda atrapado y cuando el precio cae de nuevo, su pánico alimenta la continuación bajista.
+</div>
+
+<div class="callout amber">
+  <div class="callout-title">⚠ La H no es la entrada — es la estructura</div>
+  Identificar la H te dice que el sesgo es bajista. La entrada real viene de la Sección Transversal (siguiente lección) o del retest del nivel 80. La H sola no es suficiente para entrar.
+</div>
+
+<div class="quiz-block">
+  <div class="quiz-title">🧠 Verifica tu comprensión</div>
+  <div class="quiz-q">El mercado cae 120 puntos desde la apertura, rebota, sube con una mecha hasta el 80 pero cierra por debajo, y empieza a caer de nuevo. ¿Qué tienes?</div>
+  <div class="quiz-options">
+    <div class="quiz-opt" onclick="answer(this, false)">Un Fork — entrada larga</div>
+    <div class="quiz-opt" onclick="answer(this, false)">Una señal de compra en el 80</div>
+    <div class="quiz-opt" onclick="answer(this, true)">Un Patrón H formándose — sesgo corto, esperar entrada en sección transversal</div>
+    <div class="quiz-opt" onclick="answer(this, false)">Hay que esperar si hace máximo más alto</div>
+  </div>
+  <div class="quiz-feedback" id="qfeed">Correcto. La H está formándose. No has entrado aún — tienes el contexto (bajista) y esperas la entrada confirmada en la sección transversal o el retest del 80. La H es estructura, no señal de entrada.</div>
+</div>
+`
+      },
+      {
+        id: 8,
+        title: 'Sección Transversal y Reparación — La entrada de precisión',
+        tag: 'Módulo 2 · Estrategia 8020',
+        intro: 'La sección transversal es el mecanismo de entrada exacto. La reparación es el imán que te dice hasta dónde puede llegar el precio.',
+        content: `
+<div class="prose">
+<p>Ya tienes el contexto (los niveles) y la estructura (Fork o H). Ahora necesitas el <strong>gatillo exacto</strong> para entrar con el stop de 10 puntos más ajustado posible. Ese gatillo es la Sección Transversal.</p>
+
+<h3>¿Qué es la Sección Transversal?</h3>
+<p>Es el punto donde el cuerpo de dos velas fuertes anteriores se cruzan en el mismo precio. Cuando el precio vuelve a ese punto exacto, es un nivel de soporte/resistencia dinámico con alta probabilidad de reacción.</p>
+</div>
+
+<div class="pattern-viz">
+  <svg viewBox="0 0 320 180" xmlns="http://www.w3.org/2000/svg">
+    <rect width="320" height="180" fill="#16162a" rx="8"/>
+    <!-- Dos velas fuertes -->
+    <rect x="40" y="40" width="16" height="70" fill="#ff4d6d" rx="2"/>
+    <line x1="48" y1="30" x2="48" y2="40" stroke="#ff4d6d" stroke-width="1.5"/>
+    <line x1="48" y1="110" x2="48" y2="125" stroke="#ff4d6d" stroke-width="1.5"/>
+    <rect x="65" y="55" width="16" height="65" fill="#00e5a0" rx="2"/>
+    <line x1="73" y1="45" x2="73" y2="55" stroke="#00e5a0" stroke-width="1.5"/>
+    <line x1="73" y1="120" x2="73" y2="135" stroke="#00e5a0" stroke-width="1.5"/>
+    <!-- Sección transversal -->
+    <line x1="30" y1="80" x2="200" y2="80" stroke="#c084fc" stroke-width="1.5" stroke-dasharray="4,2"/>
+    <text x="202" y="83" fill="#c084fc" font-size="9">Cruce</text>
+    <!-- Precio regresa -->
+    <polyline points="90,50 110,60 130,70 150,78" fill="none" stroke="#60a5fa" stroke-width="2"/>
+    <!-- Toca la sección transversal -->
+    <circle cx="155" cy="80" r="5" fill="#c084fc" opacity="0.9"/>
+    <text x="163" y="72" fill="#c084fc" font-size="8">Toca el cruce</text>
+    <!-- Reacción -->
+    <polyline points="155,80 170,90 185,110 200,130 215,145" fill="none" stroke="#ff4d6d" stroke-width="2"/>
+    <text x="218" y="148" fill="#ff4d6d" font-size="8">↓ continúa</text>
+    <!-- Entrada -->
+    <text x="152" y="100" fill="#ff4d6d" font-size="9">← ENTRA</text>
+  </svg>
+  <div class="viz-label">El precio regresa al cruce entre dos velas previas → toca → reacciona → entrada</div>
+</div>
+
+<div class="prose">
+<h3>La Reparación — El imán de órdenes</h3>
+<p>Una vela sin mecha superior (en una tendencia bajista) o sin mecha inferior (en una alcista) significa que <strong>no hubo participantes a esos precios</strong>. Las órdenes límite que estaban ahí nunca se ejecutaron.</p>
+<p>Esas órdenes siguen esperando. El precio eventualmente regresará a "reparar" esa zona y ejecutarlas. Por eso Okala lo llama un <strong>imán</strong>.</p>
+</div>
+
+<div class="pattern-viz">
+  <svg viewBox="0 0 320 160" xmlns="http://www.w3.org/2000/svg">
+    <rect width="320" height="160" fill="#16162a" rx="8"/>
+    <!-- Vela sin mecha superior -->
+    <rect x="40" y="80" width="16" height="55" fill="#ff4d6d" rx="2"/>
+    <line x1="48" y1="135" x2="48" y2="145" stroke="#ff4d6d" stroke-width="1.5"/>
+    <text x="30" y="75" fill="#ffcc44" font-size="8">Sin mecha</text>
+    <text x="30" y="63" fill="#ffcc44" font-size="8">= IMÁN aquí</text>
+    <line x1="30" y1="80" x2="280" y2="80" stroke="#ffcc44" stroke-width="1" stroke-dasharray="3,2" opacity="0.7"/>
+    <!-- Velas bajistas normales -->
+    <rect x="65" y="95" width="14" height="45" fill="#ff4d6d" rx="2"/>
+    <line x1="72" y1="85" x2="72" y2="95" stroke="#ff4d6d" stroke-width="1.5"/>
+    <line x1="72" y1="140" x2="72" y2="148" stroke="#ff4d6d" stroke-width="1.5"/>
+    <rect x="84" y="108" width="14" height="38" fill="#ff4d6d" rx="2"/>
+    <line x1="91" y1="95" x2="91" y2="108" stroke="#ff4d6d" stroke-width="1.5"/>
+    <!-- Sube al imán -->
+    <polyline points="105,130 130,115 155,100 175,82" fill="none" stroke="#60a5fa" stroke-width="2"/>
+    <circle cx="175" cy="80" r="5" fill="#ffcc44" opacity="0.9"/>
+    <text x="183" y="75" fill="#ffcc44" font-size="8">Toca el imán</text>
+    <!-- Continúa bajando -->
+    <polyline points="175,80 195,95 215,112 235,130" fill="none" stroke="#ff4d6d" stroke-width="2" stroke-dasharray="3,2"/>
+    <text x="238" y="133" fill="#ff4d6d" font-size="8">↓</text>
+  </svg>
+  <div class="viz-label">Vela sin mecha = órdenes no ejecutadas. El precio sube a "reparar" esa zona y puede continuar</div>
+</div>
+
+<div class="callout green">
+  <div class="callout-title">✓ Cómo combinar todo</div>
+  La entrada de mayor probabilidad en la estrategia 8020 combina:<br>
+  <strong>Nivel 8020 + Patrón (Fork o H) + Sección Transversal + Imán de Reparación</strong><br><br>
+  Cuantos más elementos coincidan, más ajustado puede ser tu stop y mayor la probabilidad de éxito. Okala llama esto "apilar confluencias".
+</div>
+
+<div class="quiz-block">
+  <div class="quiz-title">🧠 Verifica tu comprensión</div>
+  <div class="quiz-q">¿Por qué una vela sin mecha es un imán para el precio?</div>
+  <div class="quiz-options">
+    <div class="quiz-opt" onclick="answer(this, false)">Porque indica que hay más compradores que vendedores</div>
+    <div class="quiz-opt" onclick="answer(this, true)">Porque hay órdenes límite no ejecutadas en esa zona que el precio debe volver a tocar</div>
+    <div class="quiz-opt" onclick="answer(this, false)">Porque es un soporte o resistencia psicológico</div>
+    <div class="quiz-opt" onclick="answer(this, false)">Porque los indicadores señalan sobrecompra ahí</div>
+  </div>
+  <div class="quiz-feedback" id="qfeed">Correcto. Sin mecha significa que el precio no visitó esa zona — los participantes con órdenes límite allí nunca se ejecutaron. Esas órdenes siguen activas y atraen al precio de vuelta. Es mecánico, no psicológico.</div>
+</div>
+`
+      }
+    ]
+  },
+  {
+    title: 'MÓDULO 3 · Ejecución en Demo',
+    color: 'amber',
+    lessons: [
+      {
+        id: 9,
+        title: 'Tu primera operación en demo MNQ',
+        tag: 'Módulo 3 · Ejecución',
+        intro: 'Teoría suficiente — es hora de abrir la plataforma. Esta lección es práctica.',
+        content: `
+<div class="callout green">
+  <div class="callout-title">✓ Antes de empezar</div>
+  Necesitas tener Tradovate demo abierto con el MNQ en gráfico de 10 minutos y 200 segundos. Si aún no lo has configurado, regresa a la Lección 2.
+</div>
+
+<div class="prose">
+<h3>El ritual de preparación (antes de cada sesión)</h3>
+</div>
+
+<div class="step-list">
+  <div class="step-item">
+    <div class="step-dot">1</div>
+    <div class="step-body"><strong>Abre los dos gráficos</strong> — 10 min para estructura, 200 seg para entradas</div>
+  </div>
+  <div class="step-item">
+    <div class="step-dot">2</div>
+    <div class="step-body"><strong>Identifica el contexto del día</strong> — ¿Tendencia? ¿Rango volátil? ¿Dónde está el precio respecto a los niveles 8020?</div>
+  </div>
+  <div class="step-item">
+    <div class="step-dot">3</div>
+    <div class="step-body"><strong>Marca los niveles del día</strong> — Dibuja líneas horizontales en los 80 y 20 más cercanos al precio actual</div>
+  </div>
+  <div class="step-item">
+    <div class="step-dot">4</div>
+    <div class="step-body"><strong>¿Hay imanes de reparación visibles?</strong> — Velas sin mecha de sesiones anteriores que aún no se han tocado</div>
+  </div>
+  <div class="step-item">
+    <div class="step-dot">5</div>
+    <div class="step-body"><strong>Apertura de Nueva York</strong> — 9:30 AM ET. Aquí empieza la volatilidad real. Evita operar antes si es posible.</div>
+  </div>
+</div>
+
+<div class="prose">
+<h3>Tu primera operación — paso a paso</h3>
+</div>
+
+<div class="mono-block">
+<span class="comment"># Espera estos eventos en orden:</span>
+
+1. El precio se acerca a un nivel 80 o 20
+2. Observa la REACCIÓN (no el número exacto)
+3. ¿Ves estructura? (mecha larga, cuerpo pequeño)
+4. La siguiente vela confirma (no rompe el extremo)
+5. Coloca orden: 1 contrato MNQ
+6. Stop: 10 puntos en contra INMEDIATO
+7. TP1: 15 puntos a favor
+8. Espera — no toques nada
+</div>
+
+<div class="callout amber">
+  <div class="callout-title">⚠ La regla de las primeras semanas</div>
+  Solo 1 contrato de MNQ por operación. No importa qué tan seguro estés. El objetivo ahora no es ganar dinero — es <strong>ejecutar correctamente el proceso</strong>. El tamaño viene después cuando la ejecución sea automática.
+</div>
+
+<div class="prose">
+<h3>Qué hacer si te equivocas</h3>
+<p>El stop saltará en 10 puntos. <strong>No lo muevas</strong>. No lo amplíes. Deja que se ejecute. Perder $20 en MNQ con stop correcto es un éxito de proceso — aprendiste que el setup no funcionó esta vez. Perder $200 porque moviste el stop es un fracaso de disciplina.</p>
+
+<h3>Después de cada operación</h3>
+</div>
+
+<div class="step-list">
+  <div class="step-item">
+    <div class="step-dot">1</div>
+    <div class="step-body"><strong>Anótala en el Log</strong> — Usa el Scanner 8020 que ya tienes instalado. Dirección, patrón, puntos, nota.</div>
+  </div>
+  <div class="step-item">
+    <div class="step-dot">2</div>
+    <div class="step-body"><strong>Toma captura del gráfico</strong> — En el momento de la entrada y al cierre. Esto es tu diario visual.</div>
+  </div>
+  <div class="step-item">
+    <div class="step-dot">3</div>
+    <div class="step-body"><strong>Hazte estas preguntas</strong> — ¿Cumplía todos los criterios? ¿Entré en el nivel correcto? ¿Respeté el stop?</div>
+  </div>
+</div>
+
+<div class="callout blue">
+  <div class="callout-title">📌 Tu tarea práctica</div>
+  Esta semana: <strong>5 operaciones demo</strong> con 1 contrato MNQ cada una. No importa si ganas o pierdes — importa que las 5 tengan stop de 10 puntos colocado antes de entrar. Tráeme las 5 anotadas y analizamos juntos.
+</div>
+`
+      },
+      {
+        id: 10,
+        title: 'Cómo revisar y mejorar tus operaciones',
+        tag: 'Módulo 3 · Ejecución',
+        intro: 'La revisión después del mercado es donde ocurre el verdadero aprendizaje. Okala hacía replays de 12 horas diarias. Así es como lo haces de forma estructurada.',
+        content: `
+<div class="prose">
+<p>Okala tardó años operando en vivo antes de sistematizar su estrategia. La diferencia entre él y la mayoría fue que <strong>revisaba cada sesión como si fuera un examen</strong>. Tú puedes comprimir ese proceso con un sistema.</p>
+
+<h3>El replay de mercado</h3>
+<p>TradingView y Tradovate tienen función de replay — puedes "rebobinar" el mercado y ver cómo se desenvolvió cualquier día pasado, barra por barra. Esto es oro para aprender sin arriesgar nada.</p>
+</div>
+
+<div class="step-list">
+  <div class="step-item">
+    <div class="step-dot">1</div>
+    <div class="step-body"><strong>Elige un día de la semana pasada</strong> — Apertura de Nueva York, NQ o MNQ en TradingView</div>
+  </div>
+  <div class="step-item">
+    <div class="step-dot">2</div>
+    <div class="step-body"><strong>Activa el replay</strong> — El botón está en la barra de herramientas de TradingView (reloj con flecha)</div>
+  </div>
+  <div class="step-item">
+    <div class="step-dot">3</div>
+    <div class="step-body"><strong>Avanza barra por barra</strong> — Identifica: ¿dónde estaban los niveles 80/20? ¿Hubo estructuras Fork o H? ¿Dónde habrías entrado?</div>
+  </div>
+  <div class="step-item">
+    <div class="step-dot">4</div>
+    <div class="step-body"><strong>Anota los setups</strong> — No los que ocurrieron, sino los que TÚ habrías tomado. ¿Habrías ganado o perdido?</div>
+  </div>
+</div>
+
+<div class="prose">
+<h3>Las preguntas de revisión post-sesión</h3>
+</div>
+
+<div class="table-wrap">
+<table>
+  <tr><th>Pregunta</th><th>Lo que buscas</th></tr>
+  <tr><td>¿La entrada cumplía todos los criterios?</td><td>Nivel + estructura + reacción + stop limpio</td></tr>
+  <tr><td>¿Entré por el razón correcta o por FOMO?</td><td>Honestidad brutal aquí</td></tr>
+  <tr><td>¿Respeté el stop o lo moví?</td><td>Moverlo es el error más costoso</td></tr>
+  <tr><td>¿Tomé el TP1 y moví a equilibrio?</td><td>La base de la gestión</td></tr>
+  <tr><td>¿Había sesgo claro ese día?</td><td>¿Tendencia o rango volátil?</td></tr>
+  <tr><td>¿Operar en hora de almuerzo NY?</td><td>Si sí, ¿fue un error?</td></tr>
+</table>
+</div>
+
+<div class="callout green">
+  <div class="callout-title">✓ El indicador de progreso real</div>
+  No es cuánto ganaste esta semana. Es: ¿mejoraste en identificar los setups? ¿Respetaste el stop el 100% de las veces? ¿Tomaste menos operaciones pero con más criterio? Eso es progreso real.
+</div>
+
+<div class="callout purple">
+  <div class="callout-title">🧠 Lo que Okala hacía diferente</div>
+  Ponía 6-8-12 horas al día mirando gráficos. Por las noches hacía replay de la sesión. Esa repetición masiva le permitió "sentir" el instrumento — saber cuándo el movimiento tiene velocidad real y cuándo es una trampa. No hay atajo para ese tiempo de pantalla, pero el replay lo acelera.
+</div>
+
+<div class="quiz-block">
+  <div class="quiz-title">🧠 Autoevaluación</div>
+  <div class="quiz-q">¿Cuál de estas actitudes refleja mejor la mentalidad correcta de revisión?</div>
+  <div class="quiz-options">
+    <div class="quiz-opt" onclick="answer(this, false)">Gané 3 de 5 operaciones — estoy progresando bien</div>
+    <div class="quiz-opt" onclick="answer(this, false)">Perdí 2 — la estrategia no funcionó hoy</div>
+    <div class="quiz-opt" onclick="answer(this, true)">Las 5 operaciones tenían stop colocado antes de entrar y cumplían criterios — eso es lo que mido ahora</div>
+    <div class="quiz-opt" onclick="answer(this, false)">Voy a ampliar el stop la próxima vez para darle más espacio</div>
+  </div>
+  <div class="quiz-feedback" id="qfeed">Correcto. Al principio el resultado en dinero no es el indicador. El proceso correcto aplicado consistentemente es lo que hay que medir. Los resultados financieros siguen al proceso, no al revés.</div>
+</div>
+`
+      },
+      {
+        id: 11,
+        title: 'Cuándo estás listo para el dinero real',
+        tag: 'Módulo 3 · Ejecución',
+        intro: 'Esta es la pregunta que todos hacen demasiado pronto. Aquí están los criterios objetivos.',
+        content: `
+<div class="prose">
+<p>No hay una fecha fija. Hay criterios. Cuando los cumplas todos, estás listo. Si te apresuras antes, el mercado te cobrará la matrícula.</p>
+
+<h3>Los 6 criterios de preparación</h3>
+</div>
+
+<div class="step-list">
+  <div class="step-item">
+    <div class="step-dot">1</div>
+    <div class="step-body">
+      <strong>30 operaciones demo con proceso correcto</strong>
+      No 30 ganadoras — 30 donde el stop estaba colocado antes de la entrada, cumplían criterios 8020 y la gestión fue correcta.
+    </div>
+  </div>
+  <div class="step-item">
+    <div class="step-dot">2</div>
+    <div class="step-body">
+      <strong>Win rate superior al 60% en demo</strong>
+      Si en demo no llegas al 60%, el dinero real no va a cambiar eso — solo va a añadir presión emocional que lo empeora.
+    </div>
+  </div>
+  <div class="step-item">
+    <div class="step-dot">3</div>
+    <div class="step-body">
+      <strong>Cero stops movidos</strong>
+      En las últimas 20 operaciones, no moviste el stop ni una sola vez. Ni para ampliar, ni para "darle más espacio".
+    </div>
+  </div>
+  <div class="step-item">
+    <div class="step-dot">4</div>
+    <div class="step-body">
+      <strong>Identifies los 3 patrones sin dudar</strong>
+      Fork, H y Sección Transversal. Los ves en el gráfico antes de que terminen de formarse. No después.
+    </div>
+  </div>
+  <div class="step-item">
+    <div class="step-dot">5</div>
+    <div class="step-body">
+      <strong>Evitas el horario de almuerzo NY</strong>
+      Consistentemente. Sin excepciones. Sabes cuándo el mercado no te da ventaja.
+    </div>
+  </div>
+  <div class="step-item">
+    <div class="step-dot">6</div>
+    <div class="step-body">
+      <strong>Tu P&L demo es positivo en la últimas 2 semanas</strong>
+      No un día bueno. Dos semanas consecutivas con más días verdes que rojos.
+    </div>
+  </div>
+</div>
+
+<div class="callout green">
+  <div class="callout-title">✓ El camino recomendado al dinero real</div>
+  En lugar de poner capital propio desde el inicio, Okala recomienda el modelo prop. Pagas $50-150 por una evaluación, y si la pasas, operas con $50,000-$150,000 del capital de la firma. Tu riesgo es solo la cuota de evaluación.
+</div>
+
+<div class="callout amber">
+  <div class="callout-title">⚠ Una advertencia importante</div>
+  Las prop firms tienen reglas de consistencia. Si un día ganas 10 veces tu promedio diario, puedes violar esa regla aunque estés en ganancias. Conoce las reglas de la firma antes de empezar la evaluación.
+</div>
+`
+      }
+    ]
+  },
+  {
+    title: 'MÓDULO 4 · El Mundo Prop',
+    color: 'purple',
+    lessons: [
+      {
+        id: 12,
+        title: 'Cómo funcionan Apex y Topstep',
+        tag: 'Módulo 4 · Prop Trading',
+        intro: 'Las prop firms de futuros son el modelo de negocio que cambió el trading para traders sin capital grande. Aquí está cómo funcionan exactamente.',
+        content: `
+<div class="prose">
+<p>Una prop firm (empresa de trading propietario) te da acceso a capital real a cambio de que pases una evaluación que demuestra que eres un trader consistente y disciplinado.</p>
+
+<h3>Las dos más usadas en la comunidad de Okala</h3>
+</div>
+
+<div class="concept-grid">
+  <div class="concept-card">
+    <div class="icon">🏆</div>
+    <div class="ctitle">Apex Trader Funding</div>
+    <div class="cdesc">Hasta 20 cuentas simultáneas. Pagos del 100% en cuentas SIM. Reglas claras sin áreas grises. Evaluación en 1 día posible. Cuotas desde ~$50.</div>
+  </div>
+  <div class="concept-card">
+    <div class="icon">📈</div>
+    <div class="ctitle">Topstep</div>
+    <div class="cdesc">La firma más establecida. Evaluación en 2 pasos. Soporte activo. Buena comunidad. Cuotas similares a Apex.</div>
+  </div>
+</div>
+
+<div class="prose">
+<h3>El proceso de evaluación (ejemplo Apex)</h3>
+</div>
+
+<div class="step-list">
+  <div class="step-item">
+    <div class="step-dot">1</div>
+    <div class="step-body"><strong>Pagas la cuota</strong> — ~$50-150 según el tamaño de cuenta que eliges ($50K, $100K, $150K)</div>
+  </div>
+  <div class="step-item">
+    <div class="step-dot">2</div>
+    <div class="step-body"><strong>Operas en cuenta simulada</strong> — Con las reglas de la evaluación activas. Tienes que alcanzar el objetivo de ganancias sin violar los límites de drawdown.</div>
+  </div>
+  <div class="step-item">
+    <div class="step-dot">3</div>
+    <div class="step-body"><strong>Pasas la evaluación</strong> — En días (no hay mínimo de días en Apex). La velocidad no importa, la consistencia sí.</div>
+  </div>
+  <div class="step-item">
+    <div class="step-dot">4</div>
+    <div class="step-body"><strong>Cuenta financiada</strong> — Operas con capital real de la firma. El 100% de las ganancias son tuyas (en Apex cuentas SIM-funded).</div>
+  </div>
+  <div class="step-item">
+    <div class="step-dot">5</div>
+    <div class="step-body"><strong>Solicitas el pago</strong> — Cuando acumulas ganancias, solicitas el pago directamente a tu cuenta bancaria o crypto.</div>
+  </div>
+</div>
+
+<div class="table-wrap">
+<table>
+  <tr><th>Parámetro</th><th>Cuenta $50K Apex</th></tr>
+  <tr><td>Objetivo de evaluación</td><td>$3,000 en ganancias</td></tr>
+  <tr><td>Drawdown máximo diario</td><td>$1,000 (trailing o EOD)</td></tr>
+  <tr><td>Drawdown máximo total</td><td>$2,500</td></tr>
+  <tr><td>Contratos MNQ máximos</td><td>~10 contratos</td></tr>
+  <tr><td>Primer pago disponible</td><td>Después del 1er día de trading funded</td></tr>
+</table>
+</div>
+
+<div class="callout amber">
+  <div class="callout-title">⚠ Las reglas que debes conocer antes de empezar</div>
+  <strong>Regla de consistencia:</strong> Tu mejor día no puede ser más del 30% de tus ganancias totales en algunos modelos. Si ganas $3,000 en un día y $200 en los demás, podrías tener problema.<br><br>
+  <strong>Sin MAE rule en Apex:</strong> No tienen regla de Máximo Adverse Excursion. Solo importan tus ganancias y pérdidas finales.
+</div>
+`
+      },
+      {
+        id: 13,
+        title: 'Reglas de las prop firms — Lo que puede hacerte fallar',
+        tag: 'Módulo 4 · Prop Trading',
+        intro: 'Traders que dominan la estrategia fallan las evaluaciones por no leer las reglas. Aquí están los errores más comunes.',
+        content: `
+<div class="prose">
+<p>Conocer la estrategia es el 50%. El otro 50% es entender las reglas específicas de la firma que eliges y operar dentro de ellas. Son juegos diferentes.</p>
+
+<h3>Los 5 errores que destruyen evaluaciones</h3>
+</div>
+
+<div class="step-list">
+  <div class="step-item">
+    <div class="step-dot">1</div>
+    <div class="step-body">
+      <strong>Violar el drawdown diario</strong>
+      Si tu límite es $1,000 diario y pierdes $1,001, la cuenta se bloquea automáticamente. No importa que tengas $5,000 de ganancias acumuladas. Mantén el riesgo por operación bajo para nunca acercarte al límite diario.
+    </div>
+  </div>
+  <div class="step-item">
+    <div class="step-dot">2</div>
+    <div class="step-body">
+      <strong>Sobreoperar un día bueno</strong>
+      Estás en racha, llevas 8 operaciones ganadoras, sigues. Luego el mercado cambia y en 3 operaciones pierdes lo que ganaste en 8. El momentum no dura para siempre.
+    </div>
+  </div>
+  <div class="step-item">
+    <div class="step-dot">3</div>
+    <div class="step-body">
+      <strong>Violar la regla de consistencia</strong>
+      Un día de $3,000 cuando tu promedio es $200 puede invalidar la evaluación según la firma. Lee las reglas de consistencia antes de dejar correr posiciones sin límite.
+    </div>
+  </div>
+  <div class="step-item">
+    <div class="step-dot">4</div>
+    <div class="step-body">
+      <strong>Operar noticias económicas importantes</strong>
+      Fed, NFP, CPI — en estos momentos el mercado puede moverse 200 puntos en segundos. Muchas firmas prohíben mantener posiciones durante estas noticias o el slippage puede ser devastador.
+    </div>
+  </div>
+  <div class="step-item">
+    <div class="step-dot">5</div>
+    <div class="step-body">
+      <strong>Cambiar de estrategia bajo presión</strong>
+      Llevas 3 pérdidas seguidas en la evaluación y empiezas a "improvisar". Ese es exactamente el momento para parar y volver al día siguiente fresco, no para cambiar todo.
+    </div>
+  </div>
+</div>
+
+<div class="callout green">
+  <div class="callout-title">✓ La estrategia 8020 es ideal para prop</div>
+  Stop de 10 puntos = riesgo predecible y controlado. Múltiples entradas por día = consistencia de operaciones. TP1 en 15 puntos = cubres el riesgo rápido. Evitar horas malas = reduces la varianza. Todo esto se alinea perfectamente con las reglas prop.
+</div>
+`
+      },
+      {
+        id: 14,
+        title: 'Tu plan de trading personal',
+        tag: 'Módulo 4 · Prop Trading',
+        intro: 'El último paso antes de operar dinero real. Un plan escrito que respetas sin importar cómo te sientas.',
+        content: `
+<div class="prose">
+<p>Un plan de trading no es una lista de deseos. Es un documento de reglas que sigues mecánicamente porque las escribiste cuando tenías la cabeza fría — no cuando el mercado te tiene emocionado o asustado.</p>
+
+<h3>Los elementos de tu plan</h3>
+</div>
+
+<div class="mono-block">
+<span class="comment">═══ MI PLAN DE TRADING 8020 ═══</span>
+
+INSTRUMENTO:     MNQ (Micro NASDAQ Futures)
+TIMEFRAMES:      10 minutos (estructura) + 200 seg (entrada)
+SESIÓN:          Apertura NY (9:30-12:00 ET)
+SESIÓN EVITAR:   12:00-13:30 ET (almuerzo NY)
+
+NIVELES VÁLIDOS: 80 y 20 (prioridad)
+                 60 y 40 (solo con estructura muy clara)
+
+PATRONES:        Fork (reversión alcista)
+                 H (continuación bajista)
+                 Sección Transversal (entrada de precisión)
+                 Reparación (objetivo/imán)
+
+GESTIÓN:
+  Stop:          10 puntos — NUNCA se mueve en contra
+  TP1:           15 puntos — siempre
+  Después TP1:   Stop a equilibrio — SIEMPRE
+  TP2:           Imán de reparación más cercano
+  Contratos:     Empezar con 1-2 MNQ
+
+REGLAS DE PAUSA:
+  Si pierdo 3 seguidas → parar por el día
+  Si el mercado no da estructura clara → no operar
+  Si es hora de almuerzo → no operar
+
+MÉTRICAS SEMANALES:
+  Win Rate objetivo:     >65%
+  Max pérdida diaria:    -$60 en MNQ (3 stops)
+  Operaciones por día:   3-8 (según el mercado)
+</div>
+
+<div class="callout blue">
+  <div class="callout-title">📌 Tu tarea final</div>
+  Copia este plan, personalízalo con tus números reales y guárdalo en tu teléfono. Léelo <strong>antes de abrir el mercado cada día</strong>. No después. Antes.
+</div>
+
+<div class="prose">
+<h3>El camino completo desde aquí</h3>
+</div>
+
+<div class="step-list">
+  <div class="step-item">
+    <div class="step-dot">1</div>
+    <div class="step-body"><strong>Ver el video de Okala</strong> — Si aún no lo has hecho, es el momento. Ya tienes el contexto teórico para aprovecharlo al máximo.</div>
+  </div>
+  <div class="step-item">
+    <div class="step-dot">2</div>
+    <div class="step-body"><strong>Replay en TradingView</strong> — 1 semana de sesiones NY en NQ. Identifica todos los setups 8020 que habrías tomado.</div>
+  </div>
+  <div class="step-item">
+    <div class="step-dot">3</div>
+    <div class="step-body"><strong>Demo en Tradovate</strong> — 30 operaciones MNQ con proceso correcto. Anótalas todas en el Scanner 8020.</div>
+  </div>
+  <div class="step-item">
+    <div class="step-dot">4</div>
+    <div class="step-body"><strong>Evaluación prop</strong> — Cuando cumplas los 6 criterios de preparación de la Lección 11, elige Apex o Topstep.</div>
+  </div>
+  <div class="step-item">
+    <div class="step-dot">5</div>
+    <div class="step-body"><strong>Primer pago</strong> — El objetivo a mediano plazo. No el primero en la historia, sino el tuyo.</div>
+  </div>
+</div>
+
+<div class="callout green">
+  <div class="callout-title">🎯 Recuerda siempre esto</div>
+  Okala fue electricista por 7 años mientras desarrollaba esta estrategia desde su teléfono. No tenía pantallas múltiples, no tenía order flow, no tenía indicadores. Tenía paciencia, disciplina y miles de horas mirando el mismo instrumento. Eso es exactamente lo que tú puedes hacer.
+</div>
+
+<div class="callout purple">
+  <div class="callout-title">✨ Has completado el curso</div>
+  Ahora tienes la teoría completa. Lo que sigue es tuyo: el tiempo de pantalla, la práctica, la consistencia. Vuelve a este curso cuando necesites refrescar cualquier concepto. Y cuando tengas operaciones reales para revisar, tráelas — las analizamos juntos.
+</div>
+`
+      }
+    ]
+  }
+];
+
+// ── STATE ──
+let currentLesson = 0;
+const totalLessons = modules.reduce((s,m) => s + m.lessons.length, 0);
+let allLessons = [];
+modules.forEach(m => m.lessons.forEach(l => allLessons.push(l)));
+let done = JSON.parse(localStorage.getItem('done_8020') || '[]');
+
+// ── INIT ──
+window.addEventListener('load', () => {
+  setTimeout(() => {
+    document.getElementById('splash').classList.add('hidden');
+    buildSidebar();
+    renderLesson(0);
+  }, 1400);
+});
+
+function buildSidebar() {
+  const nav = document.getElementById('sidebar-nav');
+  let idx = 0;
+  nav.innerHTML = modules.map((mod, mi) => `
+    <div class="module-group">
+      <div class="module-label">${mod.title}</div>
+      ${mod.lessons.map(l => {
+        const i = idx++;
+        const isDone = done.includes(l.id);
+        return `<div class="lesson-item ${isDone ? 'done' : ''}" id="li-${i}" onclick="goTo(${i});closeSidebar()">
+          <div class="lesson-num">${isDone ? '✓' : l.id}</div>
+          ${l.title}
+        </div>`;
+      }).join('')}
+    </div>
+  `).join('');
+  updateProgress();
+}
+
+function updateProgress() {
+  const pct = Math.round((done.length / totalLessons) * 100);
+  document.getElementById('prog-fill').style.width = pct + '%';
+  document.getElementById('prog-text').textContent = `${done.length} de ${totalLessons} lecciones`;
+}
+
+function renderLesson(idx) {
+  currentLesson = idx;
+  const l = allLessons[idx];
+  document.getElementById('topbar-title').textContent = l.title;
+  document.getElementById('topbar-badge').textContent = 'L' + l.id;
+
+  const isDone = done.includes(l.id);
+  document.getElementById('lesson-content').innerHTML = `
+    <div class="lesson-header">
+      <div class="lesson-module-tag">${l.tag}</div>
+      ${isDone ? '<div class="lesson-done-badge">✓ Completada</div>' : ''}
+      <div class="lesson-title">${l.title}</div>
+      <div class="lesson-intro">${l.intro}</div>
+    </div>
+    ${l.content}
+    <div style="height:2rem"></div>
+  `;
+
+  // Update sidebar active
+  document.querySelectorAll('.lesson-item').forEach((el, i) => {
+    el.classList.toggle('active', i === idx);
+  });
+
+  // Update nav buttons
+  const nextBtn = document.getElementById('next-btn');
+  if (idx === totalLessons - 1) {
+    nextBtn.textContent = '¡Curso completado! 🎉';
+    nextBtn.className = 'nav-btn done-btn';
+  } else {
+    nextBtn.textContent = 'Siguiente →';
+    nextBtn.className = 'nav-btn next';
+  }
+
+  window.scrollTo(0, 0);
+  markDone(l.id);
+}
+
+function markDone(id) {
+  if (!done.includes(id)) {
+    done.push(id);
+    localStorage.setItem('done_8020', JSON.stringify(done));
+    buildSidebar();
+  }
+}
+
+function goTo(idx) { renderLesson(idx); }
+
+function nextLesson() {
+  if (currentLesson < totalLessons - 1) renderLesson(currentLesson + 1);
+}
+function prevLesson() {
+  if (currentLesson > 0) renderLesson(currentLesson - 1);
+}
+
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('open');
+  document.getElementById('overlay').classList.toggle('show');
+}
+function closeSidebar() {
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('overlay').classList.remove('show');
+}
+
+// Quiz
+function answer(el, correct) {
+  if (el.classList.contains('disabled')) return;
+  const opts = el.parentElement.querySelectorAll('.quiz-opt');
+  opts.forEach(o => o.classList.add('disabled'));
+  el.classList.add(correct ? 'correct' : 'wrong');
+  const fb = el.closest('.quiz-block').querySelector('.quiz-feedback');
+  fb.classList.add('show', correct ? 'ok' : 'fail');
+  if (!correct) fb.textContent = '❌ ' + fb.textContent;
+  else fb.textContent = '✓ ' + fb.textContent;
+}
+</script>
+</body>
+</html>
